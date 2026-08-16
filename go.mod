@@ -2,7 +2,10 @@ module github.com/AkaraChen/yoi
 
 go 1.24
 
-require github.com/spf13/cobra v1.10.2
+require (
+	github.com/AkaraChen/ctxl v0.0.0-20260816140526-05607758b28a
+	github.com/spf13/cobra v1.10.2
+)
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

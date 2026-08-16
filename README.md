@@ -1,6 +1,6 @@
 # yoi
 
-Go CLI for Yoi day-0 deploys. Skills call this binary; they do not parse the files themselves.
+Thin CLI on ctxl for Yoi day-0 deploys. Schema and skills live in this repo. Skills call this binary; they do not parse the files themselves.
 
 Install onto PATH:
 

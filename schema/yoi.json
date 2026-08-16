@@ -1,0 +1,40 @@
+{
+  "name": "yoi",
+  "description": "Current deploy state and append-only deploy log.",
+  "entities": [
+    {
+      "name": "deploy",
+      "kind": "singular",
+      "format": "markdown",
+      "write": "replace",
+      "path": "DEPLOY.md",
+      "location": "root",
+      "scope": "project",
+      "description": "Current deploy state. Reopen or copy to another machine.",
+      "fields": [
+        {"name": "service", "type": "string", "required": true},
+        {"name": "port", "type": "string"},
+        {"name": "start", "type": "string", "required": true},
+        {"name": "stop", "type": "string", "required": true},
+        {"name": "last_green", "type": "string"}
+      ]
+    },
+    {
+      "name": "log",
+      "kind": "plural",
+      "format": "ndjson",
+      "path": "deploy.log",
+      "location": "store",
+      "scope": "project",
+      "description": "Append-only deploy log.",
+      "fields": [
+        {"name": "id", "type": "int"},
+        {"name": "ts", "type": "string"},
+        {"name": "project", "type": "string"},
+        {"name": "result", "type": "string", "required": true},
+        {"name": "cmd", "type": "string", "required": true},
+        {"name": "custom_data", "type": "object"}
+      ]
+    }
+  ]
+}

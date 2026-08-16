@@ -1,13 +1,12 @@
 package audit
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
-	"time"
+
+	"github.com/AkaraChen/ctxl/schema"
+	"github.com/AkaraChen/ctxl/store"
+	yoi "github.com/AkaraChen/yoi"
 )
 
 const RelPath = ".yoi/deploy.log"
@@ -41,58 +40,75 @@ func DefaultProject(root string) string {
 	return filepath.Base(root)
 }
 
+func open(root string) (store.Store, schema.Entity, error) {
+	s, err := schema.Parse(yoi.SchemaJSON)
+	if err != nil {
+		return store.Store{}, schema.Entity{}, err
+	}
+	st, err := store.Open(s, store.ScopeProject, root)
+	if err != nil {
+		return store.Store{}, schema.Entity{}, err
+	}
+	e, err := st.Entity("log")
+	return st, e, err
+}
+
 func Append(root string, in Entry) (Entry, error) {
-	if err := os.MkdirAll(filepath.Dir(Path(root)), 0o755); err != nil {
-		return Entry{}, err
-	}
-	existing, err := ReadAll(root)
+	st, e, err := open(root)
 	if err != nil {
 		return Entry{}, err
 	}
-	in.ID = 1
-	if n := len(existing); n > 0 {
-		in.ID = existing[n-1].ID + 1
+	fields := map[string]any{
+		"project": in.Project,
+		"result":  in.Result,
+		"cmd":     in.Cmd,
 	}
-	in.TS = time.Now().Format(time.RFC3339)
-	line, err := json.Marshal(in)
+	if in.CustomData != nil {
+		fields["custom_data"] = in.CustomData
+	}
+	row, err := st.AppendNDJSON(e, fields)
 	if err != nil {
 		return Entry{}, err
 	}
-	f, err := os.OpenFile(Path(root), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err != nil {
-		return Entry{}, err
-	}
-	defer f.Close()
-	if _, err := f.Write(append(line, '\n')); err != nil {
-		return Entry{}, err
-	}
-	return in, nil
+	return entryFrom(row), nil
 }
 
 func ReadAll(root string) ([]Entry, error) {
-	f, err := os.Open(Path(root))
+	st, e, err := open(root)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
-	defer f.Close()
-	var out []Entry
-	sc := bufio.NewScanner(f)
-	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-	lineNo := 0
-	for sc.Scan() {
-		lineNo++
-		line := strings.TrimSpace(sc.Text())
-		if line == "" {
-			continue
-		}
-		var e Entry
-		if err := json.Unmarshal([]byte(line), &e); err != nil {
-			return nil, fmt.Errorf("%s:%d: %w", RelPath, lineNo, err)
-		}
-		out = append(out, e)
+	rows, err := st.ListNDJSON(e)
+	if err != nil {
+		return nil, err
 	}
-	return out, sc.Err()
+	out := make([]Entry, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, entryFrom(row))
+	}
+	return out, nil
+}
+
+func entryFrom(row map[string]any) Entry {
+	e := Entry{
+		TS:      fmt.Sprint(row["ts"]),
+		Project: fmt.Sprint(row["project"]),
+		Result:  fmt.Sprint(row["result"]),
+		Cmd:     fmt.Sprint(row["cmd"]),
+	}
+	switch n := row["id"].(type) {
+	case int:
+		e.ID = n
+	case int64:
+		e.ID = int(n)
+	case float64:
+		e.ID = int(n)
+	}
+	if extra, ok := row["custom_data"].(map[string]any); ok {
+		e.CustomData = extra
+	}
+	if e.TS == "<nil>" {
+		e.TS = ""
+	}
+	return e
 }

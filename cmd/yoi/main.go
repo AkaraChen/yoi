@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/AkaraChen/yoi/internal/audit"
+	"github.com/AkaraChen/yoi/internal/skillsdata"
 	"github.com/AkaraChen/yoi/internal/state"
 )
 
@@ -18,17 +19,37 @@ func main() {
 }
 
 func run(args []string) error {
-	if len(args) < 2 {
-		return fmt.Errorf("usage: yoi <deploy|log> <write|show|append>")
+	if len(args) < 1 {
+		return fmt.Errorf("usage: yoi <deploy|log|skills> ...")
 	}
 	switch args[0] {
 	case "deploy":
 		return runDeploy(args[1:])
 	case "log":
 		return runLog(args[1:])
+	case "skills":
+		return runSkills(args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (want deploy or log)", args[0])
+		return fmt.Errorf("unknown command %q (want deploy, log, or skills)", args[0])
 	}
+}
+
+func runSkills(args []string) error {
+	if len(args) == 0 || args[0] == "list" {
+		return printJSON(skillsdata.List())
+	}
+	if args[0] != "get" {
+		return fmt.Errorf("usage: yoi skills list | yoi skills get <deploy|log>")
+	}
+	if len(args) < 2 {
+		return fmt.Errorf("usage: yoi skills get <deploy|log>")
+	}
+	body, err := skillsdata.Get(args[1])
+	if err != nil {
+		return err
+	}
+	fmt.Print(body)
+	return nil
 }
 
 func runDeploy(args []string) error {

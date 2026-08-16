@@ -25,4 +25,12 @@ yoi log show --full
 
 `log append` writes one LDJSON line to `.yoi/deploy.log`. Fixed fields: `id`, `ts`, `project`, `result`, `cmd`. `custom_data` is optional. `log show` prints fixed fields unless `--full`.
 
-Two skills in `skills/`: current state vs audit log. They stay separate.
+Skills are embedded in the binary (same pattern as agent-browser). Agents should not cache the markdown:
+
+```bash
+yoi skills list
+yoi skills get deploy
+yoi skills get log
+```
+
+`skills/yoi/SKILL.md` is a thin stub that only points at those two commands.

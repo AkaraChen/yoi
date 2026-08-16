@@ -4,171 +4,190 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/AkaraChen/yoi/internal/audit"
 	"github.com/AkaraChen/yoi/internal/skillsdata"
 	"github.com/AkaraChen/yoi/internal/state"
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	if err := run(os.Args[1:]); err != nil {
+	if err := newRoot().Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "yoi: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(args []string) error {
-	if len(args) < 1 {
-		return fmt.Errorf("usage: yoi <deploy|log|skills> ...")
+func newRoot() *cobra.Command {
+	root := &cobra.Command{
+		Use:           "yoi",
+		Short:         "Current deploy state and append-only deploy log",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
-	switch args[0] {
-	case "deploy":
-		return runDeploy(args[1:])
-	case "log":
-		return runLog(args[1:])
-	case "skills":
-		return runSkills(args[1:])
-	default:
-		return fmt.Errorf("unknown command %q (want deploy, log, or skills)", args[0])
-	}
+	root.AddCommand(newDeploy(), newLog(), newSkills())
+	return root
 }
 
-func runSkills(args []string) error {
-	if len(args) == 0 || args[0] == "list" {
-		return printJSON(skillsdata.List())
-	}
-	if args[0] != "get" {
-		return fmt.Errorf("usage: yoi skills list | yoi skills get <deploy|log>")
-	}
-	if len(args) < 2 {
-		return fmt.Errorf("usage: yoi skills get <deploy|log>")
-	}
-	body, err := skillsdata.Get(args[1])
-	if err != nil {
-		return err
-	}
-	fmt.Print(body)
-	return nil
+func newDeploy() *cobra.Command {
+	cmd := &cobra.Command{Use: "deploy", Short: "Read or overwrite DEPLOY.md"}
+	cmd.AddCommand(newDeployWrite(), newDeployShow())
+	return cmd
 }
 
-func runDeploy(args []string) error {
-	if len(args) < 1 {
-		return fmt.Errorf("usage: yoi deploy <write|show>")
-	}
-	root, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	switch args[0] {
-	case "write":
-		fs := parseFlags(args[1:])
-		rec := state.Record{
-			Service: fs["service"],
-			Port:    fs["port"],
-			Start:   fs["start"],
-			Stop:    fs["stop"],
-			Body:    fs["body"],
-		}
-		if rec.Service == "" || rec.Start == "" || rec.Stop == "" {
-			return fmt.Errorf("deploy write needs --service --start --stop (optional --port --body)")
-		}
-		return state.Write(root, rec)
-	case "show":
-		rec, err := state.Read(root)
-		if err != nil {
-			return err
-		}
-		return printJSON(rec)
-	default:
-		return fmt.Errorf("unknown deploy subcommand %q", args[0])
-	}
-}
-
-func runLog(args []string) error {
-	if len(args) < 1 {
-		return fmt.Errorf("usage: yoi log <append|show>")
-	}
-	root, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	switch args[0] {
-	case "append":
-		fs := parseFlags(args[1:])
-		var custom map[string]any
-		if raw := fs["custom"]; raw != "" {
-			if err := json.Unmarshal([]byte(raw), &custom); err != nil {
-				return fmt.Errorf("custom_data must be a JSON object: %w", err)
+func newDeployWrite() *cobra.Command {
+	var service, port, start, stop, body string
+	cmd := &cobra.Command{
+		Use:   "write",
+		Short: "Overwrite DEPLOY.md with the current five keys",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			root, err := os.Getwd()
+			if err != nil {
+				return err
 			}
-		}
-		project := fs["project"]
-		if project == "" {
-			project = audit.DefaultProject(root)
-		}
-		if fs["result"] == "" || fs["cmd"] == "" {
-			return fmt.Errorf("log append needs --result --cmd (optional --project --custom)")
-		}
-		entry, err := audit.Append(root, audit.Entry{
-			Project:    project,
-			Result:     fs["result"],
-			Cmd:        fs["cmd"],
-			CustomData: custom,
-		})
-		if err != nil {
-			return err
-		}
-		return printJSON(entry.Fixed())
-	case "show":
-		fs := parseFlags(args[1:])
-		full := flagSet(args[1:], "full")
-		entries, err := audit.ReadAll(root)
-		if err != nil {
-			return err
-		}
-		out := make([]any, 0, len(entries))
-		for _, e := range entries {
-			if full || fs["full"] == "true" {
-				out = append(out, e)
-			} else {
-				out = append(out, e.Fixed())
+			return state.Write(root, state.Record{
+				Service: service,
+				Port:    port,
+				Start:   start,
+				Stop:    stop,
+				Body:    body,
+			})
+		},
+	}
+	cmd.Flags().StringVar(&service, "service", "", "service name")
+	cmd.Flags().StringVar(&port, "port", "", "listen port")
+	cmd.Flags().StringVar(&start, "start", "", "how to start")
+	cmd.Flags().StringVar(&stop, "stop", "", "how to stop")
+	cmd.Flags().StringVar(&body, "body", "", "one or two human sentences")
+	_ = cmd.MarkFlagRequired("service")
+	_ = cmd.MarkFlagRequired("start")
+	_ = cmd.MarkFlagRequired("stop")
+	return cmd
+}
+
+func newDeployShow() *cobra.Command {
+	return &cobra.Command{
+		Use:   "show",
+		Short: "Print the current DEPLOY.md keys",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			root, err := os.Getwd()
+			if err != nil {
+				return err
 			}
-		}
-		return printJSON(out)
-	default:
-		return fmt.Errorf("unknown log subcommand %q", args[0])
+			rec, err := state.Read(root)
+			if err != nil {
+				return err
+			}
+			return printJSON(rec)
+		},
 	}
 }
 
-func parseFlags(args []string) map[string]string {
-	out := map[string]string{}
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		if !strings.HasPrefix(a, "--") {
-			continue
-		}
-		key := strings.TrimPrefix(a, "--")
-		if key == "full" {
-			out["full"] = "true"
-			continue
-		}
-		if i+1 >= len(args) || strings.HasPrefix(args[i+1], "--") {
-			out[key] = "true"
-			continue
-		}
-		i++
-		out[key] = args[i]
-	}
-	return out
+func newLog() *cobra.Command {
+	cmd := &cobra.Command{Use: "log", Short: "Append or read .yoi/deploy.log"}
+	cmd.AddCommand(newLogAppend(), newLogShow())
+	return cmd
 }
 
-func flagSet(args []string, name string) bool {
-	for _, a := range args {
-		if a == "--"+name {
-			return true
-		}
+func newLogAppend() *cobra.Command {
+	var result, command, project, custom string
+	cmd := &cobra.Command{
+		Use:   "append",
+		Short: "Append one LDJSON line",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			root, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			var extra map[string]any
+			if custom != "" {
+				if err := json.Unmarshal([]byte(custom), &extra); err != nil {
+					return fmt.Errorf("custom_data must be a JSON object: %w", err)
+				}
+			}
+			if project == "" {
+				project = audit.DefaultProject(root)
+			}
+			entry, err := audit.Append(root, audit.Entry{
+				Project:    project,
+				Result:     result,
+				Cmd:        command,
+				CustomData: extra,
+			})
+			if err != nil {
+				return err
+			}
+			return printJSON(entry.Fixed())
+		},
 	}
-	return false
+	cmd.Flags().StringVar(&result, "result", "", "green or fail")
+	cmd.Flags().StringVar(&command, "cmd", "", "command that was run")
+	cmd.Flags().StringVar(&project, "project", "", "project name (defaults to directory name)")
+	cmd.Flags().StringVar(&custom, "custom", "", "optional JSON object for custom_data")
+	_ = cmd.MarkFlagRequired("result")
+	_ = cmd.MarkFlagRequired("cmd")
+	return cmd
+}
+
+func newLogShow() *cobra.Command {
+	var full bool
+	cmd := &cobra.Command{
+		Use:   "show",
+		Short: "Print log lines; default is fixed fields only",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			root, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			entries, err := audit.ReadAll(root)
+			if err != nil {
+				return err
+			}
+			out := make([]any, 0, len(entries))
+			for _, e := range entries {
+				if full {
+					out = append(out, e)
+				} else {
+					out = append(out, e.Fixed())
+				}
+			}
+			return printJSON(out)
+		},
+	}
+	cmd.Flags().BoolVar(&full, "full", false, "include custom_data")
+	return cmd
+}
+
+func newSkills() *cobra.Command {
+	cmd := &cobra.Command{Use: "skills", Short: "Serve bundled skill markdown from this binary"}
+	cmd.AddCommand(newSkillsList(), newSkillsGet())
+	return cmd
+}
+
+func newSkillsList() *cobra.Command {
+	return &cobra.Command{
+		Use:   "list",
+		Short: "List bundled skills",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return printJSON(skillsdata.List())
+		},
+	}
+}
+
+func newSkillsGet() *cobra.Command {
+	return &cobra.Command{
+		Use:   "get <deploy|log>",
+		Short: "Print a bundled skill",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			body, err := skillsdata.Get(args[0])
+			if err != nil {
+				return err
+			}
+			fmt.Print(body)
+			return nil
+		},
+	}
 }
 
 func printJSON(v any) error {

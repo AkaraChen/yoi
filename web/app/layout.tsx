@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   description: "产品介绍商品。",
 };
 
+function Shell({ children }: { children: ReactNode }) {
+  return <div className="w-full px-6">{children}</div>;
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,27 +26,31 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body>
         <header>
-          <div className="container flex h-14 items-center justify-between">
-            <Link href="/" className="text-sm font-semibold">
-              Yoi
-            </Link>
-            <nav className="flex items-center gap-1">
-              <Link
-                href="/"
-                className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-              >
-                商品
+          <Shell>
+            <div className="flex h-14 items-center justify-between">
+              <Link href="/" className="text-sm font-semibold">
+                Yoi
               </Link>
-            </nav>
-          </div>
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+                >
+                  商品
+                </Link>
+              </nav>
+            </div>
+          </Shell>
           <Separator />
         </header>
-        <main className="container py-10">{children}</main>
+        <main className="py-10">
+          <Shell>{children}</Shell>
+        </main>
         <footer>
           <Separator />
-          <div className="container py-6 text-sm text-muted-foreground">
-            Yoi
-          </div>
+          <Shell>
+            <div className="py-6 text-sm text-muted-foreground">Yoi</div>
+          </Shell>
         </footer>
       </body>
     </html>

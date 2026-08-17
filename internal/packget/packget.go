@@ -86,5 +86,5 @@ func getOK(client *http.Client, rawURL string) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET %s: %s", u.String(), resp.Status)
 	}
-	return io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	return io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 }

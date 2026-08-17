@@ -5,6 +5,17 @@
     "page.mdx",
     "index.json",
     "skill/SKILL.md",
-    "reference/install.sh"
+    "reference/install.sh",
+    "images/cover.png",
+    "images/hero.webp",
+    "images/platform-mac.webp",
+    "images/platform-windows.webp",
+    "images/platform-linux.webp",
+    "images/feature-connect.webp",
+    "images/feature-memory.webp",
+    "images/feature-automation.webp",
+    "images/feature-tasks.webp",
+    "images/feature-browse.webp",
+    "images/feature-sandbox.webp"
   ]
 }

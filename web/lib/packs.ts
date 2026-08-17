@@ -1,6 +1,15 @@
 import { promises as fs } from "fs";
 import path from "path";
 
+const COVER_CANDIDATES = [
+  "images/cover.png",
+  "images/cover.webp",
+  "images/cover.jpg",
+  "cover.png",
+  "cover.webp",
+  "cover.jpg",
+];
+
 export function packsRoot() {
   return [
     path.join(process.cwd(), "..", "packs"),
@@ -67,7 +76,23 @@ export async function listPackFiles(name: string, dir = "") {
   return files;
 }
 
+export async function packCover(name: string) {
+  for (const rel of COVER_CANDIDATES) {
+    try {
+      await readPackFile(name, rel);
+      return `/packs/${name}/${rel}`;
+    } catch {
+      // try next
+    }
+  }
+  return "";
+}
+
 export function excerptFromMdx(src: string) {
-  const line = src.replace(/\r\n/g, "\n").split("\n").find((item) => item.trim());
+  const line = src
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((item) => item.trim())
+    .find((item) => item && !item.startsWith("!") && !item.startsWith("#"));
   return line ?? "";
 }

@@ -46,10 +46,10 @@ export default async function ProductPage({ params }: Props) {
           商品
         </Link>
       </p>
-      <div className="grid items-start gap-8 md:grid-cols-[1fr_18rem]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-4 text-base leading-7">
           <h1 className="text-3xl font-bold tracking-tight">{slug}</h1>
-          {renderMdx(raw)}
+          {renderMdx(raw, slug)}
         </div>
         <Card>
           <CardHeader>

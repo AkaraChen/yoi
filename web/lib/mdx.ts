@@ -1,6 +1,18 @@
 import type { ReactNode } from "react";
 import { createElement } from "react";
 
+const IMAGE = /^!\[([^\]]*)\]\(([^)]+)\)$/;
+
+function imageSrc(src: string, pack?: string) {
+  if (/^https?:\/\//.test(src) || src.startsWith("/")) {
+    return src;
+  }
+  if (!pack) {
+    return src;
+  }
+  return `/packs/${pack}/${src}`;
+}
+
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
   const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)|`([^`]+)`/g;
@@ -41,7 +53,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
   return nodes;
 }
 
-export function renderMdx(src: string): ReactNode[] {
+export function renderMdx(src: string, pack?: string): ReactNode[] {
   const lines = src.replace(/\r\n/g, "\n").split("\n");
   const out: ReactNode[] = [];
   let i = 0;
@@ -49,6 +61,19 @@ export function renderMdx(src: string): ReactNode[] {
   while (i < lines.length) {
     const line = lines[i];
     if (line.trim() === "") {
+      i += 1;
+      continue;
+    }
+    const img = line.trim().match(IMAGE);
+    if (img) {
+      out.push(
+        createElement("img", {
+          key: k++,
+          src: imageSrc(img[2], pack),
+          alt: img[1],
+          className: "my-4 w-full rounded-lg",
+        }),
+      );
       i += 1;
       continue;
     }
@@ -69,6 +94,17 @@ export function renderMdx(src: string): ReactNode[] {
           createElement("code", null, buf.join("\n")),
         ),
       );
+      continue;
+    }
+    if (line.startsWith("### ")) {
+      out.push(
+        createElement(
+          "h3",
+          { key: k++, className: "text-lg font-semibold tracking-tight" },
+          line.slice(4),
+        ),
+      );
+      i += 1;
       continue;
     }
     if (line.startsWith("## ")) {

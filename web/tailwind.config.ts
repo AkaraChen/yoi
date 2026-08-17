@@ -4,11 +4,6 @@ const config: Config = {
   darkMode: ["class"],
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: { "2xl": "768px" },
-    },
     extend: {
       colors: {
         border: "hsl(var(--border))",

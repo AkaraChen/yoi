@@ -10,7 +10,7 @@ export const posts: Post[] = [
     slug: "yoi",
     title: "yoi",
     date: "2026-08-17",
-    excerpt: "go install github.com/AkaraChen/yoi/cmd/yoi@latest",
+    excerpt: "/skills/yoi.md",
   },
   {
     slug: "hermes",

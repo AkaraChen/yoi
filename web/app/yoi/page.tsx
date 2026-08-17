@@ -19,12 +19,10 @@ export default function YoiPage() {
           2026-08-17
         </time>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-4 text-base leading-7">
+        <p>把 yoi skill 交给自己的 agent。</p>
         <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
-          <code>go install github.com/AkaraChen/yoi/cmd/yoi@latest</code>
-        </pre>
-        <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
-          <code>yoi get hermes</code>
+          <code>/skills/yoi.md</code>
         </pre>
       </div>
     </article>

@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: Props) {
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">
           <Link href="/" className="hover:underline">
-            文章
+            商品
           </Link>
         </p>
         <h1 className="text-3xl font-bold tracking-tight">{slug}</h1>

@@ -38,6 +38,6 @@ yoi get NAME
 
 `yoi get NAME` downloads pack NAME from https://yoi-sigma.vercel.app/packs/NAME into ./packs/NAME. It does not install the product.
 
-`skills/yoi/SKILL.md` checks for the CLI, then runs `yoi get hermes`.
+`skills/yoi/SKILL.md` checks for the CLI, then runs `yoi get NAME` for the product the human named.
 
 Product knowledge lives in [`packs/`](packs/) (Hermes is one pack). Agents read the pack skill as a file. Do not embed product packs in this binary. How to deploy and how to record green lives in `yoi skills get deploy`, the same for every product.

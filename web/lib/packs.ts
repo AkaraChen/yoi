@@ -23,6 +23,24 @@ export async function resolvePacksRoot() {
   throw new Error("packs directory not found");
 }
 
+export async function listPackNames() {
+  const root = await resolvePacksRoot();
+  const entries = await fs.readdir(root, { withFileTypes: true });
+  const names: string[] = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    try {
+      await fs.access(path.join(root, entry.name, "page.mdx"));
+      names.push(entry.name);
+    } catch {
+      // skip
+    }
+  }
+  return names.sort();
+}
+
 export async function readPackFile(name: string, rel: string) {
   const root = await resolvePacksRoot();
   const target = path.resolve(root, name, rel);
@@ -47,4 +65,9 @@ export async function listPackFiles(name: string, dir = "") {
     }
   }
   return files;
+}
+
+export function excerptFromMdx(src: string) {
+  const line = src.replace(/\r\n/g, "\n").split("\n").find((item) => item.trim());
+  return line ?? "";
 }

@@ -1,15 +1,11 @@
 ---
 name: hermes
-description: Knowledge about Hermes and how to install from the pack reference after yoi get hermes.
+description: Knowledge about Hermes — how to pick a model, what counts as a usable chat, and the pack reference install.
 ---
 
 # Hermes
 
-先读 `packs/hermes/CHECKLIST.md` 和 `packs/hermes/page.mdx`。
-
-## 它是什么
-
-命令行 agent，上游是 https://github.com/NousResearch/hermes-agent 。有用的面是终端对话，不是网关。
+先读 `packs/hermes/CHECKLIST.md`。
 
 ## 模型怎么选
 

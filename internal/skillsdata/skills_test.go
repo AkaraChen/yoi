@@ -14,31 +14,6 @@ func TestGetKnown(t *testing.T) {
 	}
 }
 
-func TestGetHermes(t *testing.T) {
-	body, err := Get("hermes")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !stringsContains(body, "CHECKLIST.md") {
-		t.Fatalf("hermes missing checklist pointer:\n%s", body)
-	}
-	if !stringsContains(body, "hermes-agent.nousresearch.com/install.sh") {
-		t.Fatalf("hermes missing locked installer URL:\n%s", body)
-	}
-}
-
-func TestListIncludesHermes(t *testing.T) {
-	names := map[string]bool{}
-	for _, s := range List() {
-		names[s.Name] = true
-	}
-	for _, want := range []string{"deploy", "log", "hermes"} {
-		if !names[want] {
-			t.Fatalf("List missing %s", want)
-		}
-	}
-}
-
 func TestGetUnknown(t *testing.T) {
 	if _, err := Get("backup"); err == nil {
 		t.Fatal("expected error")

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Clean-Linux reference install for NousResearch/hermes-agent.
+# Linux reference install for NousResearch/hermes-agent.
 # Does nothing until the human types yes. Does not start the gateway.
+# An existing Hermes install is fine: skip instead of refusing.
 set -euo pipefail
 
 UPSTREAM_REPO="https://github.com/NousResearch/hermes-agent"
@@ -17,11 +18,8 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 if command -v hermes >/dev/null 2>&1; then
-  die "hermes is already on PATH; this pack expects a clean machine"
-fi
-
-if [ -e "${HOME}/.hermes" ]; then
-  die "${HOME}/.hermes already exists; this pack expects a clean machine"
+  echo "hermes is already on PATH; nothing to install"
+  exit 0
 fi
 
 echo "This script will:"
@@ -44,9 +42,5 @@ curl -fsSL "${INSTALLER_URL}" -o "${tmp}"
 bash "${tmp}"
 
 echo
-echo "Installer finished. Reload the shell, then check green:"
-echo "  source ~/.bashrc   # or ~/.zshrc"
-echo "  command -v hermes"
-echo "  hermes --help"
-echo "Then pick a model yourself (hermes model or hermes setup) and start hermes."
-echo "Green is a working CLI chat. Gateway is out of scope."
+echo "Installer finished. Reload the shell: source ~/.bashrc  # or ~/.zshrc"
+echo "What counts as a usable chat is in the knowledge pack, not this script."

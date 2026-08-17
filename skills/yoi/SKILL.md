@@ -10,7 +10,6 @@ This file is a discovery stub, not the usage guide. Before running any `yoi` com
 ```bash
 yoi skills get deploy   # current state — reopen / copy to another machine
 yoi skills get log      # audit log — failures / how many times
-yoi skills get hermes   # beginner Hermes install — only when the human asked
 ```
 
-The skills stay separate. Do not preload them together. The CLI serves content that matches this binary, so do not rely on a cached copy of this stub.
+The two skills stay separate. Do not preload both. The CLI serves content that matches this binary, so do not rely on a cached copy of this stub.

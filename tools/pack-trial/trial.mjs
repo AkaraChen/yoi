@@ -37,12 +37,13 @@ const QUESTION_RE =
   /[?？]|吗[。，!！]?$|请(你|您|问)|需要(你|您)|告诉(我|你)|回(我|复)|确认|是否|要不要|可以吗|行不行|粘贴|贴(一|上)|输入|选(择|一个|\d)|provide|paste|enter|your (api|token|key|password)/i;
 
 function parseArgs(argv) {
-  const args = { slug: null, docker: false, keep: false, timeoutMin: 60 };
+  const args = { slug: null, docker: false, keep: false, timeoutMin: 60, packSource: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--docker") args.docker = true;
     else if (a === "--keep") args.keep = true;
     else if (a === "--timeout-min") args.timeoutMin = Number(argv[++i]);
+    else if (a === "--pack-source") args.packSource = argv[++i];
     else if (!a.startsWith("-")) args.slug = a;
   }
   if (!args.slug) {
@@ -56,12 +57,15 @@ function docker(args, opts = {}) {
   return execFileSync("docker", args, { encoding: "utf8", ...opts }).trim();
 }
 
-function initialPrompt(slug) {
+function initialPrompt(slug, packSource) {
   const name = NAMES[slug] ?? slug;
+  const sourceNote = packSource
+    ? `\n注意：本机的 pack 源已镜像到 ${packSource}，拉 pack 时用 \`yoi get --from ${packSource} ${slug}\`（或设 YOI_PACKS=${packSource}）。这是网络安排，照用即可，别的都按 pack 说明来。`
+    : "";
   return `我想在这台机器上把 ${name} 跑起来。
 
 第一步，先安装 yoi 的 skill：npx skills add AkaraChen/yoi --skill yoi -g
-第二步，用 yoi 安装 ${slug} 这个 pack，按里面的说明完成安装，并按它的「可用标准」验证。
+第二步，用 yoi 安装 ${slug} 这个 pack，按里面的说明完成安装，并按它的「可用标准」验证。${sourceNote}
 
 过程中需要我做的事（确认、贴密钥、输密码等）直接问我。`;
 }
@@ -216,7 +220,7 @@ async function main() {
       ]);
 
     // 6. play the human
-    let message = initialPrompt(slug);
+    let message = initialPrompt(slug, args.packSource);
     const deadline = Date.now() + args.timeoutMin * 60_000;
     let emptyTurns = 0;
     tlog(`\n**人类**: ${message}\n`);

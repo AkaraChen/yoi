@@ -25,8 +25,12 @@ for cmd in git curl xz; do
 done
 if [ -n "${missing}" ]; then
   echo "error: missing prerequisites:${missing}" >&2
-  echo "The human must install them first, e.g. on Debian/Ubuntu:" >&2
-  echo "  sudo apt install git curl xz-utils" >&2
+  echo "Install them, then re-run this script. Two ways:" >&2
+  echo "  - no root: stay in userland, e.g. extract the distro package under ~/.local" >&2
+  echo "    (dpkg-deb -x xz-utils_*.deb ~/.local/pkg) and link the binaries into ~/.local/bin" >&2
+  echo "  - with root, on Debian/Ubuntu: sudo apt install git curl xz-utils" >&2
+  echo "Never prompt for a root/su password. If neither way works, stop and report" >&2
+  echo "what is missing; the human decides what to do next." >&2
   exit 1
 fi
 

@@ -40,6 +40,8 @@ Hermes 是 [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-ag
 - 自建 endpoint「能连但返回垃圾」 → 先用别的客户端验证它真的是 OpenAI 兼容
 - 感觉不对就按官方顺序来：`hermes doctor` → `hermes model` → `hermes setup`
 
+实测补充（2026-08 沙箱试验）：官方安装器有长时间静默阶段——uv/Python 下载和 git clone 期间可能几分钟无输出。这不是卡死，不要中断安装进程；只有出现明确报错文字或新的交互提示时才行动。
+
 ## 怎么算可用
 
 同时满足：

@@ -18,12 +18,13 @@ disable-model-invocation: true
 ## 跑试验
 
 ```bash
-cd tools/pack-trial && node trial.mjs <slug> [--docker] [--timeout-min N] [--keep]
+cd tools/pack-trial && node trial.mjs <slug> [--docker] [--timeout-min N] [--keep] [--pack-source URL]
 ```
 
 - 首次使用先 `npm install`（tools/pack-trial 下）
 - `--docker`：lobehub 专用。挂载宿主机 docker socket，并在容器内装 docker CLI + compose 插件（无 root，静态二进制进 `~/.local/bin`）
 - `--keep`：保留容器用于调试（默认试后销毁）
+- `--pack-source URL`：让容器里的 `yoi get` 走指定 pack 源（如本地镜像服务）而不是线上；用于试验尚未部署到线上的 pack 改动
 - 试验要跑几十分钟，放后台并监控输出
 
 驱动行为（写死在 trial.mjs 里，改行为就改脚本）：

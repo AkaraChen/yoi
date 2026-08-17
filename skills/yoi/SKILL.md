@@ -13,6 +13,6 @@ The human will say 用 yoi 安装 NAME. NAME is the pack they named. Do not pick
    Fallback (needs Go installed): `go install github.com/AkaraChen/yoi/cmd/yoi@latest`
 3. Run `yoi get NAME`.
 4. After the pack lands in `packs/NAME/`, follow `packs/NAME/reference/install.sh`. The script waits for a typed yes. Do not skip that.
-5. Green: record with `yoi deploy write` and `yoi log append`. Load those skills from the binary if needed: `yoi skills get deploy`, `yoi skills get log`.
+5. Record green only after the pack's full usable check passes: `yoi deploy write` and `yoi log append --result green`. Stopped at a human-only step (credentials, interactive UI)? That is not green — use `yoi log append --result fail --custom '{"stopped_at":"..."}'`. Load those skills from the binary if needed: `yoi skills get deploy`, `yoi skills get log`.
 
 Do not invent another pack URL. Default is `https://yoi-sigma.vercel.app/packs/<name>`.

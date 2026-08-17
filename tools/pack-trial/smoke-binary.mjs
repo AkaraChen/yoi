@@ -123,13 +123,16 @@ async function main() {
         metrics.wallToVersionSec = Math.round((Date.now() - startedAt.getTime()) / 1000);
         say(`>>> v0.1.0 detected at +${metrics.wallToVersionSec}s`);
       }
-      if (!metrics.usedInstallSh && /install\.sh/.test(raw)) metrics.usedInstallSh = true;
-      if (!metrics.usedGoInstall && /go install/.test(raw)) metrics.usedGoInstall = true;
       const u = event.payload?.params?.update ?? event.payload ?? {};
       if (u.sessionUpdate === "agent_message_chunk" && u.content?.text) {
         agentBuf += u.content.text;
       } else if (u.sessionUpdate === "tool_call") {
         metrics.toolCalls++;
+        // only executed commands count — the skill text itself mentions both
+        // install paths and would false-positive if we scanned raw events
+        const title = u.title ?? "";
+        if (/install\.sh/.test(title)) metrics.usedInstallSh = true;
+        if (/go install/.test(title)) metrics.usedGoInstall = true;
         tlog(`\n> 工具: ${u.title ?? u.toolCallId} (${u.status ?? ""})`);
       }
     });

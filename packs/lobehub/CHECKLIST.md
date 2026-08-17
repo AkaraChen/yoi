@@ -28,6 +28,13 @@ LobeHub 是开源的 Agent 运营平台（官方自称"首席 Agent 运营官"�
 - `S3_ENDPOINT` 不能填容器名（如 `http://rustfs:9000`）：浏览器解析不了容器名，会话图片上传会失败（头像上传不受影响）。
 - 数据库 schema 迁移在启动时自动进行，官方要求使用空库实例，不要复用已有数据的库。
 
+实测撞到的上游问题（2026-08 沙箱试验，非官方文档内容）：
+
+- `paradedb/paradedb:latest-pg17` 拉取会卡在 layer 合并阶段，debug 模式也无报错——是该 tag 的 manifest 路径问题。改用 `paradedb/paradedb:pg17` 标签即可正常拉取，功能等价。
+- 官方生成的 `rustfs-init` 用 `mc anonymous set-json` 设桶策略，与当前 mc 版本不兼容而失败；改成 `mc anonymous set download rustfs/lobe` 即可。
+- `searxng` 挂载自定义配置文件在当前镜像下会崩溃循环（exit 127，镜像内挂载约定已变）；先不挂配置、用镜像默认配置启动，保证服务可用。
+- 通过共享 docker socket 部署时（如容器内控制宿主 daemon），compose 里的 `./data` bind mount 按宿主路径解析，宿主残留的旧数据会让 ParadeDB 健康检查反复失败；把数据目录改成命名 volume 可彻底避开。
+
 ## 模型怎么选
 
 人自己在面板里配置模型 provider 密钥（OpenAI、Anthropic 等），填好即可开始对话。agent 只许提醒，不许代填。

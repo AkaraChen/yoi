@@ -3,14 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Separator } from "@/components/ui/separator";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Yoi",
-  description: "产品介绍商品。",
+  description: "Yoi",
 };
 
 function Shell({ children }: { children: ReactNode }) {
@@ -27,18 +25,10 @@ export default function RootLayout({
       <body>
         <header>
           <Shell>
-            <div className="flex h-14 items-center justify-between">
+            <div className="flex h-14 items-center">
               <Link href="/" className="text-sm font-semibold">
                 Yoi
               </Link>
-              <nav className="flex items-center gap-1">
-                <Link
-                  href="/"
-                  className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-                >
-                  商品
-                </Link>
-              </nav>
             </div>
           </Shell>
           <Separator />

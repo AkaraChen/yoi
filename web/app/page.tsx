@@ -17,27 +17,24 @@ export default async function HomePage() {
     }),
   );
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">商品</h1>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <Link key={product.slug} href={`/${product.slug}`} className="block">
-            <Card className="h-full overflow-hidden transition-colors hover:bg-accent/40">
-              {product.cover ? (
-                <img
-                  src={product.cover}
-                  alt=""
-                  className="aspect-video w-full object-cover"
-                />
-              ) : null}
-              <CardHeader>
-                <CardTitle>{product.slug}</CardTitle>
-                <CardDescription>{product.excerpt}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
-      </div>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {products.map((product) => (
+        <Link key={product.slug} href={`/${product.slug}`} className="block">
+          <Card className="h-full overflow-hidden transition-colors hover:bg-accent/40">
+            {product.cover ? (
+              <img
+                src={product.cover}
+                alt=""
+                className="aspect-video w-full object-cover"
+              />
+            ) : null}
+            <CardHeader>
+              <CardTitle>{product.slug}</CardTitle>
+              <CardDescription>{product.excerpt}</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
+      ))}
     </div>
   );
 }

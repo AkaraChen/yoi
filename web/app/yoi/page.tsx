@@ -22,7 +22,7 @@ export default function YoiPage() {
       <div className="space-y-4 text-base leading-7">
         <p>把 yoi skill 交给自己的 agent。</p>
         <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
-          <code>/skills/yoi.md</code>
+          <code>https://yoi-sigma.vercel.app/skills/yoi.md</code>
         </pre>
       </div>
     </article>

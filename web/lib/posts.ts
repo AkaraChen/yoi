@@ -10,7 +10,7 @@ export const posts: Post[] = [
     slug: "yoi",
     title: "yoi",
     date: "2026-08-17",
-    excerpt: "/skills/yoi.md",
+    excerpt: "https://yoi-sigma.vercel.app/skills/yoi.md",
   },
   {
     slug: "hermes",

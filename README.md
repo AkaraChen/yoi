@@ -35,4 +35,4 @@ yoi skills get log
 
 `skills/yoi/SKILL.md` is a thin stub that only points at those two commands.
 
-Beginner Hermes install lives in [`packs/hermes/`](packs/hermes/) as content: a human checklist, a clean-Linux reference script, and an opt-in skill. Agents read `packs/hermes/skill/SKILL.md` directly. Do not embed product packs in this binary. Green is a working CLI chat. Do not treat the gateway as day-0.
+Product knowledge lives in [`packs/`](packs/) (Hermes is one pack). Agents read the pack skill as a file. Do not embed product packs in this binary. How to deploy and how to record green lives in `yoi skills get deploy`, the same for every product.

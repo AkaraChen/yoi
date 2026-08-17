@@ -176,7 +176,7 @@ func newSkillsList() *cobra.Command {
 
 func newSkillsGet() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get <deploy|log|hermes>",
+		Use:   "get <deploy|log>",
 		Short: "Print a bundled skill",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

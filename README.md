@@ -31,9 +31,8 @@ Skills are embedded in the binary (same pattern as agent-browser). Agents should
 yoi skills list
 yoi skills get deploy
 yoi skills get log
-yoi skills get hermes
 ```
 
-`skills/yoi/SKILL.md` is a thin stub that only points at those commands.
+`skills/yoi/SKILL.md` is a thin stub that only points at those two commands.
 
-Beginner Hermes install lives in [`packs/hermes/`](packs/hermes/): a human checklist, a clean-Linux reference script, and an opt-in skill. Green is a working CLI chat. Do not treat the gateway as day-0.
+Beginner Hermes install lives in [`packs/hermes/`](packs/hermes/) as content: a human checklist, a clean-Linux reference script, and an opt-in skill. Agents read `packs/hermes/skill/SKILL.md` directly. Do not embed product packs in this binary. Green is a working CLI chat. Do not treat the gateway as day-0.

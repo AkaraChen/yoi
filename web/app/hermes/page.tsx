@@ -62,6 +62,9 @@ export default function HermesPage() {
           <li>它能正常显示帮助，没有立刻报错退出。</li>
           <li>你发出一句对话，并且模型有回应。</li>
         </ol>
+        <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
+          <code>yoi get https://yoi-sigma.vercel.app/hermes.md</code>
+        </pre>
       </div>
     </article>
   );

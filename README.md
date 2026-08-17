@@ -33,7 +33,11 @@ Skills are embedded in the binary (same pattern as agent-browser). Agents should
 yoi skills list
 yoi skills get deploy
 yoi skills get log
+
+yoi get https://example.com/page.md
 ```
+
+`yoi get` prints the text at a URL. It does not install anything.
 
 `skills/yoi/SKILL.md` is a thin stub that only points at those two commands.
 

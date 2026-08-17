@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/AkaraChen/yoi/internal/audit"
+	"github.com/AkaraChen/yoi/internal/fetch"
 	"github.com/AkaraChen/yoi/internal/skillsdata"
 	"github.com/AkaraChen/yoi/internal/state"
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ func newRoot() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newDeploy(), newLog(), newSkills())
+	root.AddCommand(newDeploy(), newLog(), newSkills(), newGet())
 	return root
 }
 
@@ -185,6 +186,25 @@ func newSkillsGet() *cobra.Command {
 				return err
 			}
 			fmt.Print(body)
+			return nil
+		},
+	}
+}
+
+func newGet() *cobra.Command {
+	return &cobra.Command{
+		Use:   "get <url>",
+		Short: "Print the text at a URL. Does not install anything.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			body, err := fetch.Text(args[0])
+			if err != nil {
+				return err
+			}
+			fmt.Print(body)
+			if len(body) > 0 && body[len(body)-1] != '\n' {
+				fmt.Println()
+			}
 			return nil
 		},
 	}

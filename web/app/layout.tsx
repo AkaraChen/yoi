@@ -1,10 +1,16 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
+
+import { Separator } from "@/components/ui/separator";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Yoi",
-  description: "网红 agent 产品的介绍站。先看产品，再谈部署。",
+  description: "产品介绍文章。",
 };
 
 export default function RootLayout({
@@ -15,12 +21,29 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body>
-        <div className="shell">
-          <a className="brand" href="/">
+        <header>
+          <div className="container flex h-14 items-center justify-between">
+            <Link href="/" className="text-sm font-semibold">
+              Yoi
+            </Link>
+            <nav className="flex items-center gap-1">
+              <Link
+                href="/"
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+              >
+                文章
+              </Link>
+            </nav>
+          </div>
+          <Separator />
+        </header>
+        <main className="container py-10">{children}</main>
+        <footer>
+          <Separator />
+          <div className="container py-6 text-sm text-muted-foreground">
             Yoi
-          </a>
-          {children}
-        </div>
+          </div>
+        </footer>
       </body>
     </html>
   );

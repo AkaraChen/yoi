@@ -1,6 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
 
+import { splitFrontmatter } from "./mdx";
+
 export function packsRoot() {
   return [
     path.join(process.cwd(), "..", "packs"),
@@ -68,6 +70,29 @@ export async function listPackFiles(name: string, dir = "") {
 }
 
 export function excerptFromMdx(src: string) {
-  const line = src.replace(/\r\n/g, "\n").split("\n").find((item) => item.trim());
+  const { body } = splitFrontmatter(src);
+  const line = body.split("\n").find((item) => item.trim());
   return line ?? "";
+}
+
+const COVER_CANDIDATES = [
+  "cover.png",
+  "cover.jpg",
+  "cover.jpeg",
+  "cover.webp",
+  "cover.svg",
+  "cover.gif",
+];
+
+export async function findPackCover(name: string) {
+  const root = await resolvePacksRoot();
+  for (const file of COVER_CANDIDATES) {
+    try {
+      await fs.access(path.join(root, name, file));
+      return `/packs/${name}/${file}`;
+    } catch {
+      // try next
+    }
+  }
+  return null;
 }

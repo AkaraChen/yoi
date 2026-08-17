@@ -1,1 +1,24 @@
-Hermes 是 Nous Research 做的命令行 agent。人在终端里跟它说话，它去调你选好的模型。
+---
+website: https://hermes-agent.nousresearch.com/
+docs: https://hermes-agent.nousresearch.com/docs/
+github: https://github.com/NousResearch/hermes-agent
+---
+
+Hermes 是 Nous Research 出品的自改进 AI agent：内置学习闭环，越用越强，住在终端和 20 多个聊天平台里，模型由你任选。
+
+## 它是什么
+
+Hermes 不是绑在 IDE 里的补全插件，也不是套壳聊天框。它是一个自主运行的 agent，跑得越久能力越强：从经验中创建 skill，在使用中改进 skill，主动把知识沉淀下来，并跨会话建立对你的认知。
+
+它可以放在任何地方——5 美元的 VPS、GPU 集群，或闲置时几乎不花钱的 serverless 环境。你在 Telegram 上给它发消息，它在你从不 SSH 的云主机上干活。
+
+## 核心能力
+
+- 学习闭环：agent 自主管理记忆并定期回顾沉淀，skill 在使用中自动改进，FTS5 跨会话检索带 LLM 摘要
+- 住在你在的地方：CLI、Telegram、Discord、Slack、WhatsApp、Signal、邮件、短信等 20 多个平台，一个 gateway 全部接入
+- 任意模型：Nous Portal、OpenRouter、OpenAI 或自建 endpoint，用 `hermes model` 随时切换，无锁定
+- 真正的终端界面：多行编辑、斜杠命令补全、会话历史、可中断重定向的完整 TUI
+- 随处运行：local、Docker、SSH、Singularity、Daytona、Modal 六种后端，serverless 后端闲置时休眠，几乎零成本
+- 60+ 内置工具：网页搜索、浏览器自动化、视觉、图像生成、语音合成，并支持 MCP 扩展
+- 自动化与并行：内置 cron 定时任务，可向任何平台投递；隔离 subagent 并行跑工作流
+- 开放 skill 标准：兼容 agentskills.io，skill 可移植、可分享

@@ -1,6 +1,6 @@
 # yoi
 
-产品介绍站在 web/。首页只放产品，CLI 是下一步。
+产品介绍站在 web/。首页即商城：品牌 hero + 商品区，CLI 是下一步。
 
 Thin CLI on ctxl for Yoi day-0 deploys. Schema and skills live in this repo. Skills call this binary; they do not parse the files themselves.
 

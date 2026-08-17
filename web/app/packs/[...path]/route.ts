@@ -4,6 +4,16 @@ import { listPackFiles, readPackFile } from "@/lib/packs";
 
 export const dynamic = "force-static";
 
+const MIME: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+  gif: "image/gif",
+  json: "application/json; charset=utf-8",
+};
+
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ path: string[] }> },
@@ -32,8 +42,10 @@ export async function GET(
 
     const rel = segments.slice(1).join("/");
     const body = await readPackFile(name, rel);
-    return new NextResponse(body, {
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    const ext = rel.split(".").pop()?.toLowerCase() ?? "";
+    const contentType = MIME[ext] ?? "text/plain; charset=utf-8";
+    return new NextResponse(new Uint8Array(body), {
+      headers: { "Content-Type": contentType },
     });
   } catch {
     return new NextResponse("not found", { status: 404 });

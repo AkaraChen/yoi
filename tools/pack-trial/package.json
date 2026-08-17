@@ -1,0 +1,10 @@
+{
+  "name": "pack-trial",
+  "private": true,
+  "type": "module",
+  "description": "Automated pack install trials: codex full-access inside a sandbox-agent container",
+  "dependencies": {
+    "sandbox-agent": "0.4.2",
+    "undici": "^8.10.0"
+  }
+}

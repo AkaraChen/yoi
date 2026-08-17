@@ -57,6 +57,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - Repository agent entrypoint is root `AGENTS.md` (`CLAUDE.md` is a symlink to it).
 - Feature development workflow skill lives at `.agents/skills/feature-dev/` (also linked from `.claude/skills/`).
 - Pack authoring workflow skill lives at `.agents/skills/add-pack/`: pack content is written from the product's official sources and mirrors the official presentation; copying the structure of existing packs is forbidden.
+- Pack trial workflow skill lives at `.agents/skills/pack-trial/`: a trial runs the full yoi path (install the yoi skill, then "用 yoi 安装 NAME") with codex in full-access mode inside an isolated sandbox-agent container, and produces a transcript plus an experience report (flow smoothness, question burden, discomfort, stopping point). Trials observe only; they never modify pack content. Trial artifacts under `trials/` are not committed.
 - Commit attempts should re-check the working tree against this specification and relevant PRDs/ADRs before landing.
 
 ## Current implementation status

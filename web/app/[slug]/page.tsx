@@ -45,11 +45,9 @@ export default async function ProductPage({ params }: Props) {
       </div>
       <div className="space-y-4 text-base leading-7">{renderMdx(raw)}</div>
       <div className="space-y-4 text-base leading-7">
-        <p>把 yoi skill 交给自己的 agent。</p>
         <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
-          <code>https://yoi-sigma.vercel.app/skills/yoi.md</code>
+          <code>npx skills add AkaraChen/yoi --skill yoi -g</code>
         </pre>
-        <p>在 agent 里说：</p>
         <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
           <code>{`用 yoi 安装 ${slug}`}</code>
         </pre>

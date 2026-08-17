@@ -11,7 +11,8 @@ import {
 
 import { CopyButton } from "@/components/copy-button";
 import { PackCover } from "@/components/pack-cover";
-import { packLinks, renderMdx } from "@/lib/mdx";
+import { MdxContent } from "@/components/mdx-content";
+import { packLinks } from "@/lib/mdx";
 import {
   excerptFromMdx,
   findPackCover,
@@ -133,8 +134,8 @@ export default async function ProductPage({ params }: Props) {
               )}
             </div>
           </div>
-          <div className="space-y-4 text-base leading-8 text-foreground/90 [&_a]:font-medium [&_a]:text-accent [&_a]:underline-offset-4 hover:[&_a]:underline [&_code]:rounded-md [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_h1]:text-display [&_h1]:text-3xl [&_h2]:pt-4 [&_h2]:text-display [&_h2]:text-2xl [&_pre]:rounded-md [&_pre]:bg-terminal [&_pre]:p-4 [&_pre]:font-mono [&_pre]:text-sm [&_pre]:text-terminal-foreground [&_pre_code]:rounded-none [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:space-y-2 [&_ul]:pl-5 [&_ol]:space-y-2 [&_ol]:pl-5">
-            {renderMdx(raw)}
+          <div className="space-y-4 text-base leading-8 text-foreground/90">
+            <MdxContent src={raw} />
           </div>
         </div>
 

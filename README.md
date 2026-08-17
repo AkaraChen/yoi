@@ -1,16 +1,18 @@
 # yoi
 
-产品介绍站在 web/。首页即商城：品牌 hero + 商品区，CLI 是下一步。
+产品介绍站在 web/：首页是品牌落地页（精选 Pack 预览），全部 Pack 在 /shop。CLI 支持 get / list / search。
 
 Thin CLI on ctxl for Yoi day-0 deploys. Schema and skills live in this repo. Skills call this binary; they do not parse the files themselves.
 
-Install onto PATH:
+Install onto PATH (no Go needed, installs the latest release binary for your platform):
 
 ```bash
-go install github.com/AkaraChen/yoi/cmd/yoi@latest
+curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install.sh | sh
 ```
 
-Or from a clone: `go install ./cmd/yoi`.
+Installs to `$HOME/.local/bin` (override with `YOI_INSTALL_DIR`); re-running upgrades. Linux/macOS, amd64/arm64.
+
+Fallback with a Go toolchain: `go install github.com/AkaraChen/yoi/cmd/yoi@latest`, or from a clone: `go install ./cmd/yoi`.
 
 ## Commands
 

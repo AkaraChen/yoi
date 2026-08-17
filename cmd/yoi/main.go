@@ -11,6 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// version is stamped by release builds via -ldflags "-X main.version=<tag>".
+var version = "dev"
+
 func main() {
 	if err := newRoot().Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "yoi: %v\n", err)
@@ -22,6 +25,7 @@ func newRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "yoi",
 		Short:         "Current deploy state and append-only deploy log",
+		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}

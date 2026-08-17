@@ -51,6 +51,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - `yoi get NAME` downloads pack NAME from `<base>/NAME` (default base `https://yoi-sigma.vercel.app/packs`) into `./packs/NAME`; it does not install anything.
 - `yoi list` prints the full pack index as JSON; `yoi search <query>` prints the subset whose slug or excerpt contains the query (case-insensitive). Both fetch `<base>/packs.json` (default base `https://yoi-sigma.vercel.app`); a get-style base ending in `/packs` is trimmed to the site root so one override value serves all commands.
 - List/search output is indented JSON on stdout, the same convention as `yoi skills list` and `yoi log show`.
+- CLI distribution (see `docs/adr/cli-binary-distribution.md`): pushing a tag matching `v*` triggers the release workflow, which publishes versionless assets `yoi_<goos>_<goarch>.tar.gz` (goos ∈ {linux, darwin}, goarch ∈ {amd64, arm64}) plus `checksums.txt` (sha256) to the GitHub Release. The install script is served at `https://raw.githubusercontent.com/AkaraChen/yoi/main/install.sh` and downloads via `https://github.com/AkaraChen/yoi/releases/latest/download/<asset>` (no auth, always latest release). Default install location is `${YOI_INSTALL_DIR:-$HOME/.local/bin}`; reinstalling overwrites the old binary (that is the upgrade path). Release binaries carry the tag as `yoi --version`; untagged builds report `dev`. Windows is not served by install.sh — `go install` is the fallback there and whenever no release exists yet.
 
 ## System-wide constraints
 

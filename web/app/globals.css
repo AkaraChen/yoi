@@ -1,0 +1,79 @@
+:root {
+  --paper: #f4efe6;
+  --ink: #1f1a14;
+  --muted: #6b6258;
+  --line: #d9d0c3;
+  --card: #fffaf3;
+  --accent: #9a3412;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", serif;
+  line-height: 1.65;
+}
+
+a { color: inherit; }
+
+.shell {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.brand {
+  display: inline-block;
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--muted);
+}
+
+h1 {
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 1.2rem 0 0.8rem;
+}
+
+.lede {
+  font-size: 1.15rem;
+  color: var(--muted);
+  margin: 0 0 2.4rem;
+}
+
+.products { display: grid; gap: 1rem; }
+
+.card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.3rem 1.4rem 1.2rem;
+  text-decoration: none;
+}
+
+.card:hover { border-color: var(--accent); }
+
+.card h2 { margin: 0 0 0.4rem; font-size: 1.35rem; }
+.card p { margin: 0; color: var(--muted); }
+
+.article h2 { font-size: 1.35rem; margin: 2rem 0 0.6rem; }
+.article p, .article li { font-size: 1.05rem; }
+.article ul, .article ol { padding-left: 1.2rem; }
+.article a { color: var(--accent); }
+
+.back {
+  display: inline-block;
+  margin-bottom: 1.4rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.back:hover { color: var(--ink); }

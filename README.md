@@ -1,5 +1,7 @@
 # yoi
 
+产品介绍站在 web/。首页只放产品，CLI 是下一步。
+
 Thin CLI on ctxl for Yoi day-0 deploys. Schema and skills live in this repo. Skills call this binary; they do not parse the files themselves.
 
 Install onto PATH:

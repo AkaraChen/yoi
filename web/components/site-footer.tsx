@@ -2,9 +2,9 @@ import Link from "next/link";
 
 const columns = [
   {
-    title: "商品",
+    title: "Pack",
     links: [
-      { label: "全部 Pack", href: "/#packs" },
+      { label: "全部 Pack", href: "/shop" },
       { label: "使用方式", href: "/#how-it-works" },
     ],
   },

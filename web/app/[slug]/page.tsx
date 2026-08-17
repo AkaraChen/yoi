@@ -79,10 +79,10 @@ export default async function ProductPage({ params }: Props) {
     <div className="container space-y-8 py-10 sm:py-14">
       <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
         <Link
-          href="/#packs"
+          href="/shop"
           className="transition-colors hover:text-foreground"
         >
-          商品
+          全部 Pack
         </Link>
         <ChevronRight className="size-3.5" aria-hidden />
         <span className="font-medium text-foreground">{slug}</span>

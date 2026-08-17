@@ -14,7 +14,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - **Spec**: this file — the single source of truth for shared terminology, observable contracts, and system-wide invariants.
 - **Pack**: a product-knowledge bundle living in a directory under `packs/`, identified by its slug (directory name, `[a-z0-9][a-z0-9-]*`). A pack is listed in the storefront only if it contains `page.mdx`. A pack ships an agent-ready skill (`skill/SKILL.md`), a checklist, and a reference install script.
 - **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the product's retention and routing layer: once installed, a human request like "用 yoi 安装 NAME" routes the agent through the yoi flow. The CLI is a delivery prerequisite that the skill flow surfaces on demand — the storefront sells the skill, not the CLI.
-- **Storefront**: the Next.js site in `web/`. The homepage `/` is simultaneously the brand landing page and the shop (product list); there is no separate shop route.
+- **Storefront**: the Next.js site in `web/`. The homepage `/` is the brand landing page with a pack preview section; the full pack list lives at `/shop`.
 
 ## Observable contracts
 
@@ -35,7 +35,9 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 ### Web storefront
 
-- Routes: `/` (landing + product list), `/[slug]` (pack detail), `/packs/...` (static file serving). No cart, checkout, account, search, or pricing surface exists.
+- Routes: `/` (landing + pack preview), `/shop` (full pack list), `/[slug]` (pack detail), `/packs/...` (static file serving), `/packs.json` (machine-readable pack index). No cart, checkout, account, search, or pricing surface exists.
+- The homepage `#packs` section is a preview: at most 3 cards plus a「查看全部」link to `/shop`. Entry points that target the full list (hero 浏览 Pack button, detail-page breadcrumb, footer 全部 Pack link) point at `/shop`.
+- `/packs.json` returns the pack index as JSON `[{ "slug": string, "excerpt": string, "cover": string|null }]`, built from the same `packs/` data the storefront renders; `cover` is a site-relative path or null (see `docs/adr/pack-list-endpoint.md`).
 - The storefront's only data source is the `packs/` directory; adding a pack requires no assets or configuration beyond the pack directory itself.
 - Pack covers: a pack may ship an official cover image as `cover.<ext>` in its directory (listed in `index.json`); packs without one get a deterministic slug-generated cover. The same slug always renders the same cover (see `docs/adr/pack-covers.md`).
 - All UI components style through the semantic design tokens in `web/app/globals.css` (e.g. `bg-primary`, `text-muted-foreground`); hard-coded colors in feature components are not allowed (see `docs/adr/web-visual-system.md`).

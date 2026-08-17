@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowDown,
   ArrowRight,
   BadgeCheck,
   Download,
@@ -14,29 +13,10 @@ import {
 } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
-import { ProductCard, type Product } from "@/components/product-card";
-import {
-  excerptFromMdx,
-  findPackCover,
-  listPackNames,
-  readPackFile,
-} from "@/lib/packs";
+import { ProductCard } from "@/components/product-card";
+import { getProducts } from "@/lib/products";
 
 const SKILL_INSTALL_CMD = "npx skills add AkaraChen/yoi --skill yoi -g";
-
-async function getProducts(): Promise<Product[]> {
-  const names = await listPackNames();
-  return Promise.all(
-    names.map(async (slug) => {
-      const raw = (await readPackFile(slug, "page.mdx")).toString("utf8");
-      return {
-        slug,
-        excerpt: excerptFromMdx(raw),
-        cover: await findPackCover(slug),
-      };
-    }),
-  );
-}
 
 function HeroTerminal() {
   return (
@@ -134,7 +114,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section>
+      <section id="top">
         <div className="container grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-[1.1fr_1fr]">
           <div className="space-y-7 animate-fade-up">
             <h1 className="text-display text-5xl leading-[1.08] sm:text-6xl">
@@ -149,7 +129,7 @@ export default async function HomePage() {
             <div className="space-y-3">
               <div
                 id="install"
-                className="flex max-w-xl scroll-mt-32 items-center gap-2 rounded-full bg-terminal p-2 pl-5 shadow-md shadow-black/10"
+                className="flex max-w-xl scroll-mt-32 items-center gap-2 rounded-lg bg-terminal p-2 pl-5 shadow-md shadow-black/10"
               >
                 <code className="flex-1 overflow-x-auto whitespace-nowrap font-mono text-sm text-terminal-foreground">
                   {SKILL_INSTALL_CMD}
@@ -161,11 +141,11 @@ export default async function HomePage() {
               </div>
               <div className="flex items-center gap-4">
                 <Link
-                  href="#packs"
+                  href="/shop"
                   className="inline-flex h-11 items-center gap-2 rounded-full border bg-secondary/60 px-6 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                 >
                   浏览 Pack
-                  <ArrowDown className="size-4" aria-hidden />
+                  <ArrowRight className="size-4" aria-hidden />
                 </Link>
                 <p className="text-xs text-muted-foreground">
                   装进 Agent 只需一次，之后说一句话就行
@@ -187,12 +167,16 @@ export default async function HomePage() {
                 全部 Pack
               </h2>
             </div>
-            <p className="text-sm text-muted-foreground">
-              共 {products.length} 件商品
-            </p>
+            <Link
+              href="/shop"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border bg-secondary/60 px-5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            >
+              查看全部
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
+            {products.slice(0, 3).map((product) => (
               <ProductCard key={product.slug} product={product} />
             ))}
           </div>
@@ -285,7 +269,7 @@ export default async function HomePage() {
                 装上 yoi skill，挑一个 Pack，让你的 Agent 现在就上手。
               </p>
               <Link
-                href="#install"
+                href="#top"
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-8 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
               >
                 安装 Yoi Skill

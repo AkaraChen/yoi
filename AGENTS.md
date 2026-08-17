@@ -28,9 +28,12 @@ Before any commit, review staged, unstaged, and untracked changes against `docs/
 
 # Commands
 
-Project: `project`.
+Web storefront (`web/`, Next.js 15 + Tailwind 3, npm):
 
-Document the repository's real build, test, lint, and format commands here after the first 质问 or when the stack is known.
+- Dev: `cd web && npm run dev`
+- Build: `cd web && npm run build`
+
+Preview convention: run exactly one shared dev server in the terminal (currently http://localhost:3000). Subagents and multitask workers must not start their own dev/preview servers; verify against the shared one. While the dev server is running, do not run `npm run build` — the production build clobbers the dev server's `.next` directory and 500s every page. If a build check is needed, stop the dev server first and restart it after.
 
 - Prefer the project's existing package manager and scripts over inventing new ones.
 

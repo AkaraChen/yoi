@@ -1,6 +1,6 @@
 # Hermes 知识
 
-这是产品知识，不是安装手册。怎么部署、绿了怎么记，走 `yoi skills get deploy`。机器上已经有 Hermes 也可以继续，不必重装。
+这是产品知识，不是安装手册。怎么部署、绿了怎么记，走 `yoi skills get deploy`。
 
 ## 它是什么
 
@@ -29,4 +29,3 @@ Hermes 是 [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-ag
 2. `hermes --help` 能打印帮助并退出 0。
 3. 人已经发出一句对话，并且模型有回应（不是立刻因缺配置退出）。
 
-已有安装只要这三条成立，就继续用，不要为了「干净」而重来。

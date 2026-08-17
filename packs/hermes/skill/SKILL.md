@@ -15,7 +15,6 @@ description: Knowledge about Hermes — what it is, how to pick a model, what co
 
 问人：用 Nous Portal，还是自带 OpenRouter / OpenAI 等密钥？密钥由人粘贴。不要代填，不要写进你能看见的记录。
 
-已有 Hermes 就接着选模型或直接对话，不要要求重装。
 
 ## 对话怎么算可用
 
@@ -26,5 +25,4 @@ description: Knowledge about Hermes — what it is, how to pick a model, what co
 ## 不要做
 
 - 不要在这份 skill 里教安装或部署。那是 `yoi skills get deploy`。
-- 不要因为机器上已有 Hermes 就拒绝继续。
 - 不要推销网关、卸载或修机。

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Linux reference install for NousResearch/hermes-agent.
 # Does nothing until the human types yes. Does not start the gateway.
-# An existing Hermes install is fine: skip instead of refusing.
 set -euo pipefail
 
 UPSTREAM_REPO="https://github.com/NousResearch/hermes-agent"
@@ -15,11 +14,6 @@ fi
 
 if [ "$(id -u)" -eq 0 ]; then
   die "do not run as root; use a normal user"
-fi
-
-if command -v hermes >/dev/null 2>&1; then
-  echo "hermes is already on PATH; nothing to install"
-  exit 0
 fi
 
 echo "This script will:"

@@ -1,8 +1,15 @@
 import Link from "next/link";
 
-import { posts } from "@/lib/posts";
+import { excerptFromMdx, listPackNames, readPackFile } from "@/lib/packs";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const names = await listPackNames();
+  const posts = await Promise.all(
+    names.map(async (slug) => {
+      const raw = (await readPackFile(slug, "page.mdx")).toString("utf8");
+      return { slug, excerpt: excerptFromMdx(raw) };
+    }),
+  );
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">文章</h1>
@@ -12,15 +19,9 @@ export default function HomePage() {
             <article className="space-y-2">
               <h2 className="text-xl font-semibold tracking-tight">
                 <Link href={`/${post.slug}`} className="hover:underline">
-                  {post.title}
+                  {post.slug}
                 </Link>
               </h2>
-              <time
-                dateTime={post.date}
-                className="block text-sm text-muted-foreground"
-              >
-                {post.date}
-              </time>
               <p className="text-muted-foreground">{post.excerpt}</p>
             </article>
           </li>

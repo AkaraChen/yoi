@@ -45,6 +45,13 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - Pack `page.mdx` is product-facing copy only: what the product is and what it can do. Deployment, installation, and setup instructions are forbidden in `page.mdx` unless they concern yoi itself — the yoi install flow is owned by the detail page's install card, never by pack content.
 - Pack links (website, docs, GitHub, …) live in `page.mdx` frontmatter as flat `key: url` pairs and render as icon buttons on the detail page; the body must not contain a links section.
 
+### CLI
+
+- Pack base URL resolution is shared across network commands: `--from` flag → `YOI_PACKS` environment variable → built-in default.
+- `yoi get NAME` downloads pack NAME from `<base>/NAME` (default base `https://yoi-sigma.vercel.app/packs`) into `./packs/NAME`; it does not install anything.
+- `yoi list` prints the full pack index as JSON; `yoi search <query>` prints the subset whose slug or excerpt contains the query (case-insensitive). Both fetch `<base>/packs.json` (default base `https://yoi-sigma.vercel.app`); a get-style base ending in `/packs` is trimmed to the site root so one override value serves all commands.
+- List/search output is indented JSON on stdout, the same convention as `yoi skills list` and `yoi log show`.
+
 ## System-wide constraints
 
 - Repository agent entrypoint is root `AGENTS.md` (`CLAUDE.md` is a symlink to it).

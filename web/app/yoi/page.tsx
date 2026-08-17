@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { renderMdx } from "@/lib/mdx";
-import { readPackFile } from "@/lib/packs";
-
 export const metadata: Metadata = {
-  title: "Hermes · Yoi",
-  description: "终端里的命令行 agent。你选模型，它在对话里替你做事。",
+  title: "yoi · Yoi",
 };
 
-export default async function HermesPage() {
-  const raw = await readPackFile("hermes", "page.mdx");
+export default function YoiPage() {
   return (
     <article className="space-y-6">
       <div className="space-y-2">
@@ -19,12 +14,19 @@ export default async function HermesPage() {
             文章
           </Link>
         </p>
-        <h1 className="text-3xl font-bold tracking-tight">Hermes</h1>
+        <h1 className="text-3xl font-bold tracking-tight">yoi</h1>
         <time dateTime="2026-08-17" className="block text-sm text-muted-foreground">
           2026-08-17
         </time>
       </div>
-      <div className="space-y-4 text-base leading-7">{renderMdx(raw.toString("utf8"))}</div>
+      <div className="space-y-4">
+        <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
+          <code>go install github.com/AkaraChen/yoi/cmd/yoi@latest</code>
+        </pre>
+        <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
+          <code>yoi get hermes</code>
+        </pre>
+      </div>
     </article>
   );
 }

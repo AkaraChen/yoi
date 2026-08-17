@@ -1,0 +1,10 @@
+{
+  "files": [
+    "README.md",
+    "CHECKLIST.md",
+    "page.mdx",
+    "index.json",
+    "skill/SKILL.md",
+    "reference/install.sh"
+  ]
+}

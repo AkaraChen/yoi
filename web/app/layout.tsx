@@ -10,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Yoi",
-  description: "产品介绍文章。",
+  description: "产品介绍商品。",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
                 href="/"
                 className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
               >
-                文章
+                商品
               </Link>
             </nav>
           </div>

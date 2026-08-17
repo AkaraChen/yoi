@@ -1,24 +1,22 @@
 ---
 name: hermes
-description: Knowledge about Hermes — how to pick a model, what counts as a usable chat, and the pack reference install.
+description: Install and verify the Hermes agent (NousResearch/hermes-agent) — official install path, provider and model setup, and the bar for a usable first chat.
 ---
 
 # Hermes
 
-先读 `packs/hermes/CHECKLIST.md`。
+先读 `packs/hermes/CHECKLIST.md`，前置条件、模型入口、可用标准以它为准。
 
-## 模型怎么选
+## 可用标准
 
-问人：用 Nous Portal，还是自带 OpenRouter / OpenAI 等密钥？密钥由人粘贴。不要代填。
+- `command -v hermes` 找得到，`hermes --help` 正常打印
+- 人已选定 provider 与模型，并完成一次真实对话（有来有回、能调工具、超过一轮）
+- `hermes --continue` 能恢复会话
 
-## 对话怎么算可用
-
-- 能打开 Hermes
-- 它能正常显示帮助
-- 人已经发出一句对话，并且模型有回应
+基础对话没跑通之前，不碰 gateway、cron、skills 等任何下一层功能。
 
 ## 安装
 
-用 `packs/hermes/reference/install.sh`。脚本要等人输入 yes。不要静默安装。
+用 `packs/hermes/reference/install.sh`：只走官方 curl 安装器，先查前置（git / curl / xz），打印将要做的事，等人输入 yes 才动手，装完即停。模型配置与密钥交还给人，agent 只提醒、不代填。
 
 绿了用 `yoi deploy write` 和 `yoi log append`。

@@ -28,7 +28,7 @@ CLI 只是交付工具，由 skill 流程按需引导安装（装前先问，不
 - `/[slug]` 详情页与首页同一套视觉系统，全站风格统一。
 - 视觉方向：Cursor 暖灰焦橙风——暖纸白底、墨色主色、焦橙单一强调色、常规字重大标题、pill 控件（见 `docs/adr/web-visual-system.md`）。
 - 主 CTA 是安装 yoi skill（`npx skills add AkaraChen/yoi --skill yoi -g`）。
-- 商品数量从 1 到 N 都要好看（当前只有 hermes 一个 pack）。
+- 商品数量从 1 到 N 都要好看（当前有 hermes、openclaw、lobehub 三个 pack）。
 - 文案语言：中文为主；商品术语叫 **Pack**（每个 Pack 内含 agent 能用的 skill）。
 
 ## 非目标

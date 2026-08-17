@@ -4,21 +4,40 @@ docs: https://hermes-agent.nousresearch.com/docs/
 github: https://github.com/NousResearch/hermes-agent
 ---
 
-Hermes 是 Nous Research 出品的自改进 AI agent：内置学习闭环，越用越强，住在终端和 20 多个聊天平台里，模型由你任选。
+Hermes 是 Nous Research 打造的自我改进型 AI agent：内置学习闭环，从经验中创建 skill 并在使用中改进它们，跨会话建立对你的认知，住在终端和 20 多个聊天平台里，模型由你任选。
 
 ## 它是什么
 
-Hermes 不是绑在 IDE 里的补全插件，也不是套壳聊天框。它是一个自主运行的 agent，跑得越久能力越强：从经验中创建 skill，在使用中改进 skill，主动把知识沉淀下来，并跨会话建立对你的认知。
+Hermes 不是拴在 IDE 上的编程副驾，也不是包着单一 API 的聊天壳。它是一个自主运行的 agent，跑得越久能力越强——官方称之为「与你一起成长的 agent」。
 
-它可以放在任何地方——5 美元的 VPS、GPU 集群，或闲置时几乎不花钱的 serverless 环境。你在 Telegram 上给它发消息，它在你从不 SSH 的云主机上干活。
+它可以住在任何地方：5 美元的 VPS、GPU 集群，或闲置时几乎不花钱的 serverless 环境。它不绑在你的笔记本上——你在 Telegram 上给它发消息，它在你从不 SSH 的云主机上干活。
 
-## 核心能力
+## 学习闭环
 
-- 学习闭环：agent 自主管理记忆并定期回顾沉淀，skill 在使用中自动改进，FTS5 跨会话检索带 LLM 摘要
-- 住在你在的地方：CLI、Telegram、Discord、Slack、WhatsApp、Signal、邮件、短信等 20 多个平台，一个 gateway 全部接入
-- 任意模型：Nous Portal、OpenRouter、OpenAI 或自建 endpoint，用 `hermes model` 随时切换，无锁定
-- 真正的终端界面：多行编辑、斜杠命令补全、会话历史、可中断重定向的完整 TUI
-- 随处运行：local、Docker、SSH、Singularity、Daytona、Modal 六种后端，serverless 后端闲置时休眠，几乎零成本
-- 60+ 内置工具：网页搜索、浏览器自动化、视觉、图像生成、语音合成，并支持 MCP 扩展
-- 自动化与并行：内置 cron 定时任务，可向任何平台投递；隔离 subagent 并行跑工作流
-- 开放 skill 标准：兼容 agentskills.io，skill 可移植、可分享
+Hermes 是唯一内置学习闭环的 agent：
+
+- 由 agent 自己管理的记忆，定期主动回顾，把知识沉淀下来
+- 完成复杂任务后自主创建 skill，skill 在使用中自我改进
+- FTS5 跨会话检索带 LLM 摘要，记得自己过去如何解决问题
+- Honcho 辩证用户建模，逐会话加深对你的认知
+- 兼容 agentskills.io 开放标准，skill 可移植、可分享
+
+## 住在你在的地方
+
+CLI、Telegram、Discord、Slack、WhatsApp、Signal、邮件、短信……20 多个平台由一个 gateway 进程接入，支持语音备忘转写与跨平台会话接续。终端里是完整的 TUI：多行编辑、斜杠命令补全、会话历史、可中断并重定向的交互、流式工具输出。
+
+## 模型由你选
+
+Nous Portal、OpenRouter、OpenAI、自建 endpoint 均可，随时用 `hermes model` 切换——无代码改动，无锁定。
+
+## 随处运行
+
+local、Docker、SSH、Singularity、Modal、Daytona、Vercel Sandbox 等多种终端后端。Daytona 与 Modal 提供 serverless 持久化：环境闲置时休眠、按需唤醒，两次会话之间几乎零成本。
+
+## 自动化与委派
+
+内置 cron 定时任务，用自然语言安排日报、备份、审计，可向任何平台投递。可派出拥有独立会话与终端的隔离 subagent 并行跑工作流；Python 脚本经 RPC 直接调用工具，把多步流水线折叠成零上下文开销的单轮。
+
+## 工具与研究
+
+网页搜索、浏览器自动化、视觉、图像生成、语音合成等数十种内置工具，并可连接任意 MCP server 扩展能力。Hermes 出自模型训练团队之手——Nous Research，Hermes、Nomos、Psyche 模型背后的实验室；支持批量轨迹生成与轨迹压缩，面向下一代工具调用模型的训练。

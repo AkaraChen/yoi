@@ -4,28 +4,49 @@
 
 ## 它是什么
 
-Hermes 是 [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) 的命令行 agent。人在终端里跟它说话，它去调你选好的模型。
+Hermes 是 [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)（MIT）的命令行 agent：人在终端或聊天平台里跟它对话，它调人选好的模型干活。
 
 - 仓库：https://github.com/NousResearch/hermes-agent
-- 文档：https://hermes-agent.nousresearch.com/docs/getting-started/quickstart
-- 第一版有用的面是终端对话，不是 Telegram / Discord 网关。
+- 文档：https://hermes-agent.nousresearch.com/docs/
+- Quickstart：https://hermes-agent.nousresearch.com/docs/getting-started/quickstart
+- 安装文档：https://hermes-agent.nousresearch.com/docs/getting-started/installation
 
-## 模型怎么选
+第一版有用的面 = 官方 quickstart 的终点：装好 → `hermes model` 选定 provider 与模型 → `hermes`（或 `hermes --tui`）完成第一段真实对话 → `hermes --continue` 能恢复会话。gateway（Telegram / Discord 等）、cron、skills、语音都是官方文档里的「下一层」；官方原话：基础对话没跑通之前，不要叠加任何功能。
 
-人自己准备模型入口。没有入口就停，不要让 agent 代申请或代填密钥。
+## 环境/配置怎么选
 
-常见两条路：
+官方安装器覆盖 Linux / macOS / WSL2 / Termux（curl 脚本）与 Windows 原生（PowerShell）；本 pack 的 reference 脚本只走 Linux。
 
-- Nous Portal：在已安装的 Hermes 里走 `hermes setup` 或 `hermes model`，用官方门户。
-- 自带密钥：OpenRouter、OpenAI 等。人自己粘贴。agent 只许提醒，不许写入它能看见的记录。
+官方写明的前置（非 Windows）：
 
-选完应能在 `hermes` 里发出一句对话。网关、定时任务、技能市场都不是这一步。
+- Git 是唯一硬前置，`git --version` 能打印即可
+- Linux 另需 `curl` 与 `xz-utils`（安装器要下载 Node.js 的 `.tar.xz`）
+- 其余一律不手动预装：uv、Python 3.11、Node.js v22、ripgrep、ffmpeg 由安装器自动处理
 
-## 对话怎么算可用
+安装布局（普通用户）：代码在 `~/.hermes/hermes-agent/`，命令是 `~/.local/bin/hermes` 的 symlink，数据在 `~/.hermes/`。装完必须 `source ~/.bashrc`（或 `~/.zshrc`）或重开终端，否则 `command not found`。
 
-同时满足下面三条，这段对话才算可用：
+配置存放：密钥与 token 进 `~/.hermes/.env`，非秘密设置进 `~/.hermes/config.yaml`；推荐用 `hermes config set` 写入，会自动放对文件。
 
-1. `command -v hermes` 能找到命令。
-2. `hermes --help` 能打印帮助并退出 0。
-3. 人已经发出一句对话，并且模型有回应（不是立刻因缺配置退出）。
+模型入口由人自己准备，agent 只提醒、不代填：
 
+- 最省事：`hermes setup --portal`，一次 OAuth 搞定 Nous Portal（300+ 模型与 Tool Gateway）
+- 或 `hermes model` 交互选择：OpenRouter、OpenAI、Anthropic、自建 OpenAI 兼容 endpoint 等
+- 硬指标：模型上下文至少 64K tokens，否则启动即被拒；本地模型要显式设 context（llama.cpp `--ctx-size 65536`，Ollama `-c 65536`）
+
+已知坑（官方 troubleshooting）：
+
+- `hermes: command not found` → reload shell 或检查 PATH
+- 能打开但回复空/乱 → provider 认证或模型选错，重跑 `hermes model`
+- 自建 endpoint「能连但返回垃圾」 → 先用别的客户端验证它真的是 OpenAI 兼容
+- 感觉不对就按官方顺序来：`hermes doctor` → `hermes model` → `hermes setup`
+
+## 怎么算可用
+
+同时满足：
+
+1. `command -v hermes` 能找到命令（找不到先 source shell 配置）。
+2. `hermes --help` 能打印帮助并退出 0；`hermes doctor` 无阻断性报错。
+3. 人已完成一次真实对话，达到官方 quickstart 的成功标准：banner 显示所选 provider/模型；回复无报错；需要时能调用工具（终端、文件读取、网页搜索）；对话能正常进行超过一轮。
+4. `hermes --continue` 能恢复刚才的会话。
+
+密钥与凭据永远由人粘贴，agent 只提醒、不代填。

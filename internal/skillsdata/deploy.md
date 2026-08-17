@@ -10,9 +10,8 @@ Call the `yoi` CLI. Do not open `DEPLOY.md` yourself.
 ## How to get to green (any product)
 
 1. Read `packs/<name>/` for what the product is, how to pick a model or config, and what a usable session looks like. Packs are knowledge. They do not replace this skill.
-2. If the service is already installed, continue. Do not require a clean machine and do not reinstall unless the human asked.
-3. If a pack has `reference/install.sh` and the service is missing, tell the human what the script will do and wait for a yes. Do not silent `curl | bash`. Do not run as root. Do not invent another installer URL.
-4. Green is the pack's usable check (command on PATH, help works, human finished one real session). Then record it. Gateway and ops are out of scope unless the human asked separately.
+2. If a pack has `reference/install.sh`, tell the human what the script will do and wait for a yes. Do not silent `curl | bash`. Do not run as root. Do not invent another installer URL.
+3. Green is the pack's usable check (command on PATH, help works, human finished one real session). Then record it. Gateway and ops are out of scope unless the human asked separately.
 
 ## Record and reopen
 

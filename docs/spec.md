@@ -47,6 +47,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 - Repository agent entrypoint is root `AGENTS.md` (`CLAUDE.md` is a symlink to it).
 - Feature development workflow skill lives at `.agents/skills/feature-dev/` (also linked from `.claude/skills/`).
+- Pack authoring workflow skill lives at `.agents/skills/add-pack/`: pack content is written from the product's official sources and mirrors the official presentation; copying the structure of existing packs is forbidden.
 - Commit attempts should re-check the working tree against this specification and relevant PRDs/ADRs before landing.
 
 ## Current implementation status

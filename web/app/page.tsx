@@ -14,7 +14,7 @@ import {
 
 import { CopyButton } from "@/components/copy-button";
 import { ProductCard } from "@/components/product-card";
-import { getProducts } from "@/lib/products";
+import { getProducts, getShopOnlySlugs } from "@/lib/products";
 
 const SKILL_INSTALL_CMD = "npx skills add AkaraChen/yoi --skill yoi -g";
 
@@ -110,7 +110,10 @@ const principles = [
 ];
 
 export default async function HomePage() {
-  const products = await getProducts();
+  const [products, shopOnly] = await Promise.all([
+    getProducts(),
+    getShopOnlySlugs(),
+  ]);
 
   return (
     <div>
@@ -176,9 +179,12 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.slice(0, 3).map((product) => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
+            {products
+              .filter((product) => !shopOnly.has(product.slug))
+              .slice(0, 3)
+              .map((product) => (
+                <ProductCard key={product.slug} product={product} />
+              ))}
           </div>
         </div>
       </section>

@@ -1,0 +1,11 @@
+# MemeSeek 包
+
+唯一源。网站读 page.mdx，CLI 用 yoi get memeseek 拉整个目录。
+
+| 文件 | 给谁 |
+|------|------|
+| page.mdx | 网站文章 |
+| CHECKLIST.md | 它是什么、环境怎么选、怎么算可用 |
+| reference/install.sh | 参考安装器，要 yes |
+| skill/SKILL.md | agent 读的 skill |
+| index.json | yoi get 要下哪些文件 |

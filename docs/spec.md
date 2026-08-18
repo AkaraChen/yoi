@@ -36,7 +36,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 ### Web storefront
 
 - Routes: `/` (landing + pack preview), `/shop` (full pack list), `/[slug]` (pack detail), `/packs/...` (static file serving), `/packs.json` (machine-readable pack index). No cart, checkout, account, search, or pricing surface exists.
-- The homepage `#packs` section is a preview: at most 3 cards plus a「查看全部」link to `/shop`. Entry points that target the full list (hero 浏览 Pack button, detail-page breadcrumb, footer 全部 Pack link) point at `/shop`.
+- The homepage `#packs` section is a preview: at most 3 cards plus a「查看全部」link to `/shop`. A pack whose `page.mdx` frontmatter sets `shop-only: true` is excluded from this preview but remains in `/shop`, `/packs.json`, and its detail page. Entry points that target the full list (hero 浏览 Pack button, detail-page breadcrumb, footer 全部 Pack link) point at `/shop`.
 - `/packs.json` returns the pack index as JSON `[{ "slug": string, "excerpt": string, "cover": string|null }]`, built from the same `packs/` data the storefront renders; `cover` is a site-relative path or null (see `docs/adr/pack-list-endpoint.md`).
 - The storefront's only data source is the `packs/` directory; adding a pack requires no assets or configuration beyond the pack directory itself.
 - Pack covers: a pack may ship an official cover image as `cover.<ext>` in its directory (listed in `index.json`); packs without one get a deterministic slug-generated cover. The same slug always renders the same cover (see `docs/adr/pack-covers.md`).

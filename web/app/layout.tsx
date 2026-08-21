@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   title: "Yoi — 面向 Agent 的部署技能商店",
   description:
     "把 yoi skill 装进你的 Agent，三分钟把网红产品在自己的 Linux 上跑起来。",
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f7f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#1b1913" },
+  ],
 };
 
 export default function RootLayout({

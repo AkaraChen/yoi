@@ -27,7 +27,35 @@
     --terminal-foreground: 0 3% 93%;
     --terminal-ok: 158 63% 33%;
     --terminal-accent: 17 55% 72%;
+    --ink: 53 12% 13%;
+    --ink-foreground: 60 14% 96%;
     --radius: 0.625rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 45 17% 9%;
+      --foreground: 0 3% 93%;
+      --card: 45 16% 10%;
+      --card-foreground: 0 3% 93%;
+      --popover: 45 17% 9%;
+      --popover-foreground: 0 3% 93%;
+      --primary: 0 3% 93%;
+      --primary-foreground: 47 29% 6%;
+      --secondary: 45 14% 11%;
+      --secondary-foreground: 0 3% 93%;
+      --muted: 45 16% 10%;
+      --muted-foreground: 40 8% 64%;
+      --accent: 19 100% 48%;
+      --accent-foreground: 0 3% 93%;
+      --destructive: 0 72% 51%;
+      --destructive-foreground: 0 3% 93%;
+      --border: 45 10% 18%;
+      --input: 45 10% 18%;
+      --ring: 19 100% 48%;
+      --ink: 45 12% 13%;
+      --ink-foreground: 0 3% 93%;
+    }
   }
 }
 
@@ -37,6 +65,7 @@
   }
   html {
     scroll-behavior: smooth;
+    color-scheme: light dark;
   }
   body {
     @apply bg-background text-foreground antialiased;

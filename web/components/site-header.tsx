@@ -4,7 +4,7 @@ import { ArrowRight, Terminal } from "lucide-react";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-primary text-primary-foreground">
+      <div className="bg-ink text-ink-foreground">
         <div className="container flex h-9 items-center justify-center gap-2 text-xs font-medium">
           <Terminal className="size-3.5" aria-hidden />
           <span>Yoi Skill 现已发布 — 装进 Agent，部署一句话的事</span>

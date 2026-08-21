@@ -266,12 +266,12 @@ export default async function HomePage() {
 
       <section className="border-t">
         <div className="container py-20">
-          <div className="relative overflow-hidden rounded-lg bg-primary px-8 py-16 text-center text-primary-foreground sm:px-16">
+          <div className="relative overflow-hidden rounded-lg bg-ink px-8 py-16 text-center text-ink-foreground sm:px-16">
             <div className="relative space-y-6">
               <h2 className="text-display text-3xl sm:text-5xl">
                 别人三天，你三分钟。
               </h2>
-              <p className="mx-auto max-w-md text-primary-foreground/70">
+              <p className="mx-auto max-w-md text-ink-foreground/70">
                 装上 yoi skill，挑一个 Pack，让你的 Agent 现在就上手。
               </p>
               <Link

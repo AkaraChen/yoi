@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/AkaraChen/ctxl/schema"
-	"github.com/AkaraChen/ctxl/store"
+	"github.com/AkaraChen/ctxl/core/schema"
+	"github.com/AkaraChen/ctxl/core/store"
 	yoi "github.com/AkaraChen/yoi"
 )
 

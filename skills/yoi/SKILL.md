@@ -1,18 +1,24 @@
 ---
 name: yoi
-description: Install the yoi CLI if needed, then pull the named product pack. Use when the human says to install a product with yoi.
+description: Install a product pack over plain HTTP (no yoi binary needed), or manage the client-side server fleet inventory with the yoi CLI. Use when the human says "用 yoi 安装 NAME", asks what packs exist, or wants to register/inspect managed servers.
 ---
 
 # yoi
 
-The human will say 用 yoi 安装 NAME. NAME is the pack they named. Do not pick a product for them.
+yoi is a deployment-skill storefront for coding agents: each pack is a complete
+deployment guide for a trending product, run on the human's own Linux server.
+This file is only a router — feature detail lives in `references/`.
 
-1. Check `command -v yoi`.
-2. If it is missing, install the CLI. Ask first. Do not silent-install.
-   First choice (no Go toolchain needed): `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install.sh | sh`
-   Fallback (needs Go installed): `go install github.com/AkaraChen/yoi/cmd/yoi@latest`
-3. Run `yoi get NAME`.
-4. After the pack lands in `packs/NAME/`, follow `packs/NAME/reference/install.sh`. The script waits for a typed yes. Do not skip that.
-5. Record green only after the pack's full usable check passes: `yoi deploy write` and `yoi log append --result green`. Stopped at a human-only step (credentials, interactive UI)? That is not green — use `yoi log append --result fail --custom '{"stopped_at":"..."}'`. Load those skills from the binary if needed: `yoi skills get deploy`, `yoi skills get log`.
+## Routing
 
-Do not invent another pack URL. Default is `https://yoi-sigma.vercel.app/packs/<name>`.
+- The human says 用 yoi 安装 NAME, asks what packs exist, or searches for a
+  pack → `references/packs.md`. Pack list/search/get are pure HTTP (curl);
+  no yoi binary is required. NAME is the pack they named — do not pick a
+  product for them.
+- Register or inspect managed servers, providers, or credential references on
+  this dev machine → `references/fleet.md` (the `yoi` ctxl CLI; the store is
+  plain markdown under `~/.yoi/`).
+
+When deploying on a server, deployment facts are recorded on that machine with
+the `yoi-server` CLI — run `yoi-server skills get` there for
+its command reference.

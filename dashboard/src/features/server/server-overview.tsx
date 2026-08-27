@@ -66,10 +66,10 @@ export const ServerOverview: FC = () => {
         title="服务器概览"
         description={
           info.data ? (
-            <p>
+            <>
               {info.data.hostname} · {info.data.os} · 内核 {info.data.kernel} ·{" "}
               {info.data.arch} · {info.data.virtualization}
-            </p>
+            </>
           ) : (
             <Skeleton className="mt-1 inline-block h-4 w-72" />
           )

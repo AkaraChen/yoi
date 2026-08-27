@@ -39,10 +39,10 @@ export const ServiceDetail: FC = () => {
             leading={<StatusDot status={s.status} className="size-2.5" />}
             title={s.name}
             description={
-              <p>
+              <>
                 {statusLabel[s.status]}
                 {s.startedAt && <> · 启动于 {formatRelative(s.startedAt)}</>}
-              </p>
+              </>
             }
           />
           <div className="grid items-start gap-4 lg:grid-cols-[1fr_260px]">

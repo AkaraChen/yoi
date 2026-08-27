@@ -7,9 +7,9 @@ import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Yoi — Vibe deploy for everyone",
+  title: "Yoi — 面向 Agent 的部署技能商店",
   description:
-    "Vibe deploy for everyone, for trending apps and your apps. 把 yoi skill 装进你的 Agent，三分钟把产品在自己的 Linux 上跑起来。",
+    "把 yoi skill 装进你的 Agent，三分钟把网红产品在自己的 Linux 上跑起来。",
 };
 
 export const viewport: Viewport = {

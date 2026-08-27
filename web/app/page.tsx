@@ -120,11 +120,10 @@ export default async function HomePage() {
       <section id="top">
         <div className="container grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-[1.1fr_1fr]">
           <div className="space-y-7 animate-fade-up">
-            <h1 className="text-display text-4xl leading-[1.1] sm:text-5xl">
-              Vibe deploy for everyone,
+            <h1 className="text-display text-5xl leading-[1.08] sm:text-6xl">
+              三分钟，
               <br />
-              for <span className="text-accent">trending apps</span> and your
-              apps.
+              把<span className="text-accent">网红产品</span>跑起来。
             </h1>
             <p className="max-w-xl text-lg leading-8 text-muted-foreground">
               把 yoi skill 装进你的 Agent，之后只需一句话：「用 yoi 安装

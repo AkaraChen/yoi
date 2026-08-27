@@ -20,8 +20,8 @@ yoi 的核心留存假设（gist 🧪 未验证项）：人 opt-in 装了 yoi sk
 
 ## 目标
 
-- 试验走**完整通路**：装 yoi skill →「用 yoi 安装 NAME」→ skill 选路 → `yoi get` →
-  参考安装脚本 → 可用标准。不跳过 skill 层直接喂 pack。
+- 试验走**完整通路**：装 yoi skill →「用 yoi 安装 NAME」→ skill 选路 → HTTP 下载
+  pack → 参考安装脚本 → 可用标准。不跳过 skill 层直接喂 pack。
 - agent 在隔离环境里跑（沙箱），不直接接触本机文件系统与凭据。
 - 每个 pack 产出：逐轮事件记录（transcript）+ 体验报告（顺畅度 / 问题负担 / 不适感 /
   停止点）。

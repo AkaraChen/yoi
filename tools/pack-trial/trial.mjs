@@ -60,7 +60,7 @@ function docker(args, opts = {}) {
 function initialPrompt(slug, packSource) {
   const name = NAMES[slug] ?? slug;
   const sourceNote = packSource
-    ? `\n注意：本机的 pack 源已镜像到 ${packSource}，拉 pack 时用 \`yoi get --from ${packSource} ${slug}\`（或设 YOI_PACKS=${packSource}）。这是网络安排，照用即可，别的都按 pack 说明来。`
+    ? `\n注意：本机的 pack 源已镜像到 ${packSource}。yoi skill 的 pack 配方是纯 HTTP，开始前先 \`export YOI_PACKS=${packSource}\`（skill 里的配方会读这个环境变量）。这是网络安排，照用即可，别的都按 pack 说明来。`
     : "";
   return `我想在这台机器上把 ${name} 跑起来。
 

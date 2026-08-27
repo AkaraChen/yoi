@@ -29,7 +29,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 ### Product positioning
 
 - The product sold on the storefront is the **skill layer** (the yoi skill plus per-pack skills). The CLI is only the delivery mechanism and must never be the headline.
-- Narrative: deployment of trending products on the user's own Linux — "三分钟跑起来，不是三天". Brand copy says "网红产品" without narrowing to agent products. The two-sided structure (初级部署 / 高级清场) from the 2026-08-13 brainstorm is not yet reflected in the storefront; the beginner deployment face leads.
+- Narrative: deployment of trending products on the user's own Linux — "三分钟跑起来，不是三天". Brand copy uses "trending apps" (English h1) and "网红产品" (Chinese body copy) interchangeably to refer to popular internet-discovered products, without narrowing to agent products. The two-sided structure (初级部署 / 高级清场) from the 2026-08-13 brainstorm is not yet reflected in the storefront; the beginner deployment face leads.
 - Red lines for any user-facing surface: no silent or unattended install claims; installation is opt-in with human-in-the-loop confirmation (the skill asks before installing the CLI; install scripts wait for a typed yes); uninstall must be honest (deleting the pack directory removes the pack); no bundling or cross-promotion of 2code; no per-page cloud AFF — AFF may only appear in 试验场/干净机 contexts if such content exists.
 - The storefront's primary call to action is installing the yoi skill (`npx skills add AkaraChen/yoi --skill yoi -g`); per-pack install is phrased as telling the agent "用 yoi 安装 <slug>".
 
@@ -42,7 +42,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - Pack covers: a pack may ship an official cover image as `cover.<ext>` in its directory (listed in `index.json`); packs without one get a deterministic slug-generated cover. The same slug always renders the same cover (see `docs/adr/pack-covers.md`).
 - All UI components style through the semantic design tokens in `web/app/globals.css` (e.g. `bg-primary`, `text-muted-foreground`); hard-coded colors in feature components are not allowed (see `docs/adr/web-visual-system.md`).
 - Storefront appearance follows the OS color scheme (`prefers-color-scheme`). There is no theme control and no remembered preference. Light tokens stay the Cursor warm-paper set; dark tokens are the warm counterpart of the same system. Unspecified preference keeps light. Terminal and command wells stay dark in both appearances. The announcement bar and homepage closing CTA use a persistent ink surface that stays a dark band in both appearances (see `docs/adr/web-dark-mode.md`).
-- Storefront copy is written in Chinese.
+- Storefront copy is primarily in Chinese. The homepage h1 slogan is in English ("Vibe deploy for everyone, for trending apps and your apps."); all other surface copy remains Chinese.
 - Pack `page.mdx` is product-facing copy only: what the product is and what it can do. Deployment, installation, and setup instructions are forbidden in `page.mdx` unless they concern yoi itself — the yoi install flow is owned by the detail page's install card, never by pack content.
 - Pack links (website, docs, GitHub, …) live in `page.mdx` frontmatter as flat `key: url` pairs and render as icon buttons on the detail page; the body must not contain a links section.
 

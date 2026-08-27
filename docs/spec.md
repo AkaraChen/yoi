@@ -16,6 +16,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the product's retention and routing layer: once installed, a human request like "用 yoi 安装 NAME" routes the agent through the yoi flow. The CLI is a delivery prerequisite that the skill flow surfaces on demand — the storefront sells the skill, not the CLI.
 - **Storefront**: the Next.js site in `web/`. The homepage `/` is the brand landing page with a pack preview section; the full pack list lives at `/shop`.
 - **Shop filter**: In-place narrowing of the `/shop` grid by a visitor query against pack slug and excerpt. It is not a search page, not a search API, and not `yoi search`.
+- **Dashboard**: the on-server probe panel in `dashboard/` — a lightweight, single-user web UI that runs on the user's own Linux server and shows current server metrics plus the services deployed on that machine. See `docs/prd/dashboard.md`.
 
 ## Observable contracts
 
@@ -42,11 +43,20 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - `/packs.json` returns the pack index as JSON `[{ "slug": string, "excerpt": string, "cover": string|null }]`, built from the same `packs/` data the storefront renders; `cover` is a site-relative path or null (see `docs/adr/pack-list-endpoint.md`).
 - The storefront's only data source is the `packs/` directory; adding a pack requires no assets or configuration beyond the pack directory itself.
 - Pack covers: a pack may ship an official cover image as `cover.<ext>` in its directory (listed in `index.json`); packs without one get a deterministic slug-generated cover. The same slug always renders the same cover (see `docs/adr/pack-covers.md`).
-- All UI components style through the semantic design tokens in `web/app/globals.css` (e.g. `bg-primary`, `text-muted-foreground`); hard-coded colors in feature components are not allowed (see `docs/adr/web-visual-system.md`).
+- All UI components style through the semantic design tokens from the shared `@yoi/design` package (`design/tokens.css` + `design/tailwind.preset.js`, consumed by `web/` and any future web surface such as `dashboard/`); hard-coded colors in feature components are not allowed (see `docs/adr/web-visual-system.md` and `docs/adr/design-token-package.md`).
 - Storefront appearance follows the OS color scheme (`prefers-color-scheme`). There is no theme control and no remembered preference. Light tokens stay the Cursor warm-paper set; dark tokens are the warm counterpart of the same system. Unspecified preference keeps light. Terminal and command wells stay dark in both appearances. The announcement bar and homepage closing CTA use a persistent ink surface that stays a dark band in both appearances (see `docs/adr/web-dark-mode.md`).
 - Storefront copy is written in Chinese.
 - Pack `page.mdx` is product-facing copy only: what the product is and what it can do. Deployment, installation, and setup instructions are forbidden in `page.mdx` unless they concern yoi itself — the yoi install flow is owned by the detail page's install card, never by pack content.
 - Pack links (website, docs, GitHub, …) live in `page.mdx` frontmatter as flat `key: url` pairs and render as icon buttons on the detail page; the body must not contain a links section.
+
+### Dashboard
+
+- The dashboard serves only `127.0.0.1` and requires password authentication; no data is visible before authentication. The password comes from `-password` or `YOI_DASHBOARD_PASSWORD` (default `yoi`, development only); `POST /api/login` issues an in-memory HttpOnly session cookie, and all `/api/*` routes except login require it (see `docs/adr/dashboard-probe-server.md`).
+- The probe is a single Go binary (`dashboard/server/`) that embeds the SPA build (`dashboard/server/dist` via `go:embed`) and serves the JSON API on the same origin. Server metrics are collected with gopsutil v4.
+- Information architecture: a left sidebar (server status entry on top, service list below) plus a main area that always shows the selected item's detail. Server and services are peers; the default landing view is the server overview.
+- Server overview metrics align with the Nezha probe's collection surface (host info + CPU/memory/swap/disk/network/connections/processes/load/uptime). Trends are kept as an in-memory ring buffer (5s sampling, last 1 hour, charts for CPU/memory/network/load); history is lost on probe restart and persistence is out of scope until user feedback asks for it (see `docs/adr/dashboard-metrics-history.md`).
+- A service detail shows four blocks: current status, resource list with usage (containers and bare-metal processes), deployment audit log, and external links.
+- The dashboard styles through `@yoi/design` semantic tokens only; it consumes data exclusively through a JSON API boundary (`src/lib/api.ts` in the SPA), so the data source (eventually the redesigned yoi CLI data model) can change without touching UI code. Service endpoints are still mock-backed until that data model lands.
 
 ### CLI
 

@@ -13,10 +13,11 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - **ADR**: an architecture decision record under `docs/adr/` capturing one material technical choice, alternatives, and consequences.
 - **Spec**: this file — the single source of truth for shared terminology, observable contracts, and system-wide invariants.
 - **Pack**: a product-knowledge bundle living in a directory under `packs/`, identified by its slug (directory name, `[a-z0-9][a-z0-9-]*`). A pack is listed in the storefront only if it contains `page.mdx`. A pack ships an agent-ready skill (`skill/SKILL.md`), a checklist, and a reference install script.
-- **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the product's retention and routing layer: once installed, a human request like "用 yoi 安装 NAME" routes the agent through the yoi flow. The CLI is a delivery prerequisite that the skill flow surfaces on demand — the storefront sells the skill, not the CLI.
+- **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the product's retention and routing layer: once installed, a human request like "用 yoi 安装 NAME" routes the agent through the yoi flow. Pack delivery inside the flow is pure HTTP (curl) — no binary is a prerequisite; the storefront sells the skill, not a CLI.
 - **Storefront**: the Next.js site in `web/`. The homepage `/` is the brand landing page with a pack preview section; the full pack list lives at `/shop`.
 - **Shop filter**: In-place narrowing of the `/shop` grid by a visitor query against pack slug and excerpt. It is not a search page, not a search API, and not `yoi search`.
 - **Dashboard**: the on-server probe panel in `dashboard/` — a lightweight, single-user web UI that runs on the user's own Linux server and shows current server metrics plus the services deployed on that machine. See `docs/prd/dashboard.md`.
+- **Agent Context Layer**: the fact-recording layer between Agent and Dashboard, storing deployment intent (Release) and execution facts (Event) as documents under `~/.yoi/`; current state (Resource) is served live by the Dashboard probe and never persisted. See `docs/prd/agent-context-layer.md` and `docs/adr/agent-data-model.md`.
 
 ## Observable contracts
 
@@ -30,7 +31,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 ### Product positioning
 
-- The product sold on the storefront is the **skill layer** (the yoi skill plus per-pack skills). The CLI is only the delivery mechanism and must never be the headline.
+- The product sold on the storefront is the **skill layer** (the yoi skill plus per-pack skills). Pack delivery is HTTP instructions inside the skill; no CLI is required for it.
 - Narrative: deployment of trending products on the user's own Linux — "三分钟跑起来，不是三天". Brand copy says "网红产品" without narrowing to agent products. The two-sided structure (初级部署 / 高级清场) from the 2026-08-13 brainstorm is not yet reflected in the storefront; the beginner deployment face leads.
 - Red lines for any user-facing surface: no silent or unattended install claims; installation is opt-in with human-in-the-loop confirmation (the skill asks before installing the CLI; install scripts wait for a typed yes); uninstall must be honest (deleting the pack directory removes the pack); no bundling or cross-promotion of 2code; no per-page cloud AFF — AFF may only appear in 试验场/干净机 contexts if such content exists.
 - The storefront's primary call to action is installing the yoi skill (`npx skills add AkaraChen/yoi --skill yoi -g`); per-pack install is phrased as telling the agent "用 yoi 安装 <slug>".
@@ -58,13 +59,30 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - A service detail shows four blocks: current status, resource list with usage (containers and bare-metal processes), deployment audit log, and external links.
 - The dashboard styles through `@yoi/design` semantic tokens only; it consumes data exclusively through a JSON API boundary (`src/lib/api.ts` in the SPA), so the data source (eventually the redesigned yoi CLI data model) can change without touching UI code. Service endpoints are still mock-backed until that data model lands.
 
+### Three worlds
+
+- **Server world**: the user's Linux server. Runs the Dashboard probe and stores deployment facts in `~/.yoi/` (markdown entities plus an NDJSON event stream). The server-side `yoi-server` CLI (ctxl-generated from `yoi-server.schema.json`) is the write entrypoint; Dashboard is read-only.
+- **Client world**: the user's development machine. Runs the user's Agent and the client-side `yoi` CLI (ctxl-generated from `yoi.schema.json`). Stores server inventory, credential references, and provider accounts in `~/.yoi/`. The Agent bridges Client and Server worlds.
+- **Web world**: the storefront in `web/`. Read-only pack marketplace; never touches Server or Client storage directly.
+
+### Agent Context Layer
+
+- Entities live at flat static paths under `~/.yoi/`: `services/<id>.md` (Service), `releases/<uuid>.md` (Release), and `events.ndjson` (append-only Event stream, one JSON object per line with CLI-supplied sequential `id` and RFC3339 `ts`). Relationships live in frontmatter/NDJSON fields, not filesystem nesting. Human-readable and Agent-parseable.
+- The write entrypoints are the two ctxl-generated CLIs: `yoi-server` on the server (schema `yoi-server.schema.json`) and `yoi` on the client (schema `yoi.schema.json`).
+- Release is an immutable deployment intent: config snapshot, Agent's plan (JSON with open action set), and outcome. Only `status` can change after creation.
+- Event is an append-only fact record with `kind` (open set), `data` (JSON), and `summary` (Agent-written human-readable text). Non-deployment events (OOM, manual restart) are independent, not tied to a Release.
+- Resource (live CPU/memory/container state) is served at request time by the Dashboard Go probe and is never persisted to the store.
+- Release status (`pending`/`active`/`failed`/`superseded`) is a fact, not a state machine. Any entity with yoi CLI permission can change it; the change itself is recorded as an Event.
+- Single-machine isolation: each Dashboard is an independent universe. Multi-machine aggregation is the user's Agent's responsibility, not yoi's.
+- The context layer records facts only; it does not validate plans, enforce rollbacks, or block dangerous operations.
+- Server-side entities are stored under `~/.yoi/` on the server; client-side entities (server inventory, credential references, provider accounts) are stored under `~/.yoi/` on the development machine. The two stores are separate and never synchronized automatically.
+
 ### CLI
 
-- Pack base URL resolution is shared across network commands: `--from` flag → `YOI_PACKS` environment variable → built-in default.
-- `yoi get NAME` downloads pack NAME from `<base>/NAME` (default base `https://yoi-sigma.vercel.app/packs`) into `./packs/NAME`; it does not install anything.
-- `yoi list` prints the full pack index as JSON; `yoi search <query>` prints the subset whose slug or excerpt contains the query (case-insensitive). Both fetch `<base>/packs.json` (default base `https://yoi-sigma.vercel.app`); a get-style base ending in `/packs` is trimmed to the site root so one override value serves all commands.
-- List/search output is indented JSON on stdout, the same convention as `yoi skills list` and `yoi log show`.
-- CLI distribution (see `docs/adr/cli-binary-distribution.md`): pushing a tag matching `v*` triggers the release workflow, which publishes versionless assets `yoi_<goos>_<goarch>.tar.gz` (goos ∈ {linux, darwin}, goarch ∈ {amd64, arm64}) plus `checksums.txt` (sha256) to the GitHub Release. The install script is served at `https://raw.githubusercontent.com/AkaraChen/yoi/main/install.sh` and downloads via `https://github.com/AkaraChen/yoi/releases/latest/download/<asset>` (no auth, always latest release). Default install location is `${YOI_INSTALL_DIR:-$HOME/.local/bin}`; reinstalling overwrites the old binary (that is the upgrade path). Release binaries carry the tag as `yoi --version`; untagged builds report `dev`. Windows is not served by install.sh — `go install` is the fallback there and whenever no release exists yet.
+- Two CLIs exist, both ctxl-generated from root schemas: `yoi` (client-world fleet inventory, `yoi.schema.json`) and `yoi-server` (server-world fact store, `yoi-server.schema.json`). Generated output lands in `generated/<name>` and is replaced in place on regeneration.
+- Pack delivery is pure HTTP inside the yoi skill (`skills/yoi/references/packs.md`), not a binary. Base URL resolution: `YOI_PACKS` environment variable → built-in default `https://yoi-sigma.vercel.app`; a `/packs` path suffix is trimmed to the site root so one override value serves all requests.
+- Pack list/search fetch `GET <base>/packs.json`; search filters client-side (case-insensitive substring on slug or excerpt). Pack get fetches `<base>/packs/<slug>/index.json` and downloads every listed file into `./packs/<slug>/`, marking `.sh` files executable; it does not install anything.
+- Binary distribution of the two ctxl CLIs is future work; until then they are built from source (see AGENTS.md).
 
 ## System-wide constraints
 

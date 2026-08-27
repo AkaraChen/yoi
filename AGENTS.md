@@ -1,5 +1,22 @@
 # Project workflows
 
+## Three worlds
+
+yoi 的产品 surface 分为三个世界，各自独立演化，通过约定好的边界交互：
+
+| 世界 | 位置 | 职责 | 存储 |
+|------|------|------|------|
+| **Server** | 用户 Linux 服务器 | Dashboard（探针面板）+ `~/.yoi/`（部署事实） | `~/.yoi/` markdown 文档 |
+| **Client** | 用户开发机 | Agent skill + `yoi` CLI（多机管理） | `~/.yoi/` 服务器清单与凭证 |
+| **Web** | `web/` storefront | Pack marketplace，展示与分发 | `packs/` 目录 |
+
+边界规则：
+
+- Server 世界的 `~/.yoi/` 由 **server 端 `yoi-server` CLI**（ctxl 生成，独立 binary）读写，Dashboard 只读。
+- Client 世界的 `~/.yoi/` 由 **client 端 `yoi` CLI**（另一套 ctxl schema 生成）读写，管理多台服务器的连接信息与凭证。
+- Web 世界只读 `packs/`，不直接触碰 Server 或 Client 的存储。
+- 用户的 Agent 是 Client 与 Server 之间的桥梁：在 Client 上运行，通过 SSH/API 连接 Server 的 Dashboard 或 CLI。
+
 ## Feature development
 
 For every new feature, use `$feature-dev` before implementation. Inspect the code and all project documentation, complete the one-question-at-a-time product and technical 质问, and record the agreed product requirements, architecture decisions, and general specification under `docs/` before changing feature code.
@@ -32,6 +49,26 @@ Web storefront (`web/`, Next.js 15 + Tailwind 3, npm):
 
 - Dev: `cd web && npm run dev`
 - Build: `cd web && npm run build`
+
+Dashboard (`dashboard/`, Vite + React SPA + Go probe):
+
+- Dev: `cd dashboard && npm run dev` (Vite on 5173, proxies `/api` to Go probe on 8788)
+- Build: `cd dashboard && npm run build`
+- Go probe: `cd dashboard/server && go build` (embeds SPA, serves on 127.0.0.1:8788)
+
+Server CLI (ctxl-generated, schema `yoi-server.schema.json`):
+
+- Generate: `go run github.com/AkaraChen/ctxl/cmd/ctxl@latest generate yoi-server.schema.json`
+- Build: `cd generated/yoi-server && go build -o yoi-server .`
+
+Client CLI (ctxl-generated, schema `yoi.schema.json`):
+
+- Generate: `go run github.com/AkaraChen/ctxl/cmd/ctxl@latest generate yoi.schema.json`
+- Build: `cd generated/yoi && go build -o yoi .`
+
+Generation output lands in `generated/<name>` next to the schema and is replaced in place on regeneration. When a local ctxl checkout is available, `cd ../ctxl && go run ./cmd/ctxl generate ...` works too — the schema pins `generation.ctxl_version`, so no published ctxl release is required.
+
+Pack delivery has no binary: it is HTTP instructions inside the yoi skill (`skills/yoi/`), which is also bundled into the client CLI as a ctxl custom skill. Custom skills are bundled byte-for-byte at generation time — after editing anything under `skills/yoi/`, regenerate `generated/yoi` or the CLI serves a stale copy.
 
 Preview convention: run exactly one shared dev server in the terminal (currently http://localhost:3000). Subagents and multitask workers must not start their own dev/preview servers; verify against the shared one. While the dev server is running, do not run `npm run build` — the production build clobbers the dev server's `.next` directory and 500s every page. If a build check is needed, stop the dev server first and restart it after.
 

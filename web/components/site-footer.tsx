@@ -12,7 +12,6 @@ const columns = [
     title: "资源",
     links: [
       { label: "GitHub", href: "https://github.com/AkaraChen/yoi" },
-      { label: "CLI 安装", href: "https://github.com/AkaraChen/yoi#readme" },
     ],
   },
 ];

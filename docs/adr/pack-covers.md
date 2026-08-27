@@ -16,7 +16,7 @@ Shopify 式商城的商品卡依赖产品图。pack 是纯 markdown 知识包，
 
 1. **Pack 自带封面优先**：pack 目录下放 `cover.png|jpg|jpeg|webp|svg|gif`
    （优先取官网/官方 OG 图）， storefront 通过 `/packs/<slug>/cover.*` 引用；
-   `index.json` 的 files 列表应包含该文件，保证 `yoi get` 一并下载。
+   `index.json` 的 files 列表应包含该文件，保证下载流程一并拉取。
 2. **生成式封面兜底**：无 `cover.*` 的 pack 仍由 slug 哈希确定性生成
    渐变 + SVG 纹理 + 首字母 monogram 封面，新 pack 丢目录即有封面。
 

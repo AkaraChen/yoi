@@ -1,7 +1,9 @@
-# ADR: Pack 列表端点（/packs.json）与 CLI list/search
+# ADR: Pack 列表端点（/packs.json）与 list/search
 
 - 状态：已接受
 - 日期：2026-08-17
+- 2026-08-27 更新：pack CLI 已删除，list/search 改为 yoi skill 内的 HTTP
+  配方（docs/adr/pack-delivery-via-skill.md）；`/packs.json` 端点契约不变。
 
 ## 背景与约束
 

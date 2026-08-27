@@ -93,8 +93,9 @@ CLI 只是交付工具，由 skill 流程按需引导安装（装前先问，不
 - 首页商品预览区最多展示 3 个 pack，标题行右侧为「查看全部 →」链接；
   `/shop` 展示全量 pack 与总数。
 - `/packs.json` 返回与商品区同源的 JSON 索引（slug / excerpt / cover），
-  供 CLI `yoi list` / `yoi search` 消费。
-- 全站不出现「卖 CLI」导向的文案；CLI 只作为 skill 流程内的按需前提出现。
+  供 yoi skill 的 list/search HTTP 配方消费。
+- 全站不出现「卖 CLI」导向的文案；pack 投递是 skill 内的纯 HTTP 流程，
+  无 CLI 前提。
 - 首页含「产品原则」版块，且承诺与 spec.md 红线一致（opt-in / 人在环 / 可卸载）。
 - 商品卡封面：pack 自带 `cover.*`（官方图）优先展示，无封面时由 slug 确定性生成，同一 slug 永远一致。
 - `npm run build` 通过；`generateStaticParams` 行为不变。

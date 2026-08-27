@@ -160,7 +160,7 @@ export default async function ProductPage({ params }: Props) {
               <CommandBlock command={askAgent} />
             </div>
             <p className="text-xs leading-5 text-muted-foreground">
-              还没装 CLI？skill 会先问你，确认后自动安装，绝不静默执行。
+              安装脚本会打印将要做的事并等你输入 yes，绝不静默执行。
             </p>
           </div>
         </aside>

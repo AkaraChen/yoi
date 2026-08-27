@@ -1,6 +1,7 @@
 # ADR: CLI 二进制分发（tag → Release 资产 + install.sh）
 
-- 状态：已接受
+- 状态：已被 docs/adr/pack-delivery-via-skill.md 取代（2026-08-27，pack
+  CLI 删除，pack 分发改为 yoi skill 内的 HTTP 配方）
 - 日期：2026-08-17
 
 ## 背景与约束

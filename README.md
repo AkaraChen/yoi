@@ -1,45 +1,34 @@
 # yoi
 
-产品介绍站在 web/：首页是品牌落地页（精选 Pack 预览），全部 Pack 在 /shop。CLI 支持 get / list / search。
+面向编码 Agent 的部署技能商店：每个 Pack 是一个网红产品的完整部署指南，
+在人自己的 Linux 服务器上跑起来。产品介绍站在 web/：首页是品牌落地页
+（精选 Pack 预览），全部 Pack 在 /shop。
 
-Thin CLI on ctxl for Yoi day-0 deploys. Schema and skills live in this repo. Skills call this binary; they do not parse the files themselves.
+## 用 yoi 安装产品
 
-Install onto PATH (no Go needed, installs the latest release binary for your platform):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install.sh | sh
-```
-
-Installs to `$HOME/.local/bin` (override with `YOI_INSTALL_DIR`); re-running upgrades. Linux/macOS, amd64/arm64.
-
-Fallback with a Go toolchain: `go install github.com/AkaraChen/yoi/cmd/yoi@latest`, or from a clone: `go install ./cmd/yoi`.
-
-## Commands
+装一次 yoi skill：
 
 ```bash
-yoi deploy write --service hermes --port 8787 --start "docker compose up -d" --stop "docker compose down" --body "再开先看这五个键。"
-yoi deploy show
-
-yoi log append --result green --cmd "docker compose up -d" --custom '{"note":"ok"}'
-yoi log show
-yoi log show --full
+npx skills add AkaraChen/yoi --skill yoi -g
 ```
 
-`deploy write` overwrites `DEPLOY.md` in the current directory (current state only).
+然后跟你的 Agent 说：「用 yoi 安装 NAME」。pack 的 list/search/get 是
+skill 内的纯 HTTP 配方（`skills/yoi/references/packs.md`），只需要
+curl，没有任何二进制要装。
 
-`log append` writes one LDJSON line to `.yoi/deploy.log`. Fixed fields: `id`, `ts`, `project`, `result`, `cmd`. `custom_data` is optional. `log show` prints fixed fields unless `--full`.
+## 三个世界
 
-Skills are embedded in the binary (same pattern as agent-browser). Agents should not cache the markdown:
+- **Server**：用户 Linux 服务器。Dashboard 探针面板 + `~/.yoi/` 部署事实。
+  写入口是 ctxl 生成的 `yoi-server` CLI（schema：`yoi-server.schema.json`）。
+- **Client**：用户开发机。Agent + ctxl 生成的 `yoi` CLI（多机清单管理，
+  schema：`yoi.schema.json`），store 是 `~/.yoi/` 下的纯 markdown。
+- **Web**：`web/` storefront，只读 `packs/` 目录。
 
-```bash
-yoi skills list
-yoi skills get deploy
-yoi skills get log
-yoi get NAME
-```
+两个 CLI 的生成与构建命令见 AGENTS.md；二进制分发是未来工作。
 
-`yoi get NAME` downloads pack NAME from https://yoi-sigma.vercel.app/packs/NAME into ./packs/NAME. It does not install the product.
+## Pack
 
-`skills/yoi/SKILL.md` checks for the CLI, then runs `yoi get NAME` for the product the human named.
-
-Product knowledge lives in [`packs/`](packs/) (Hermes is one pack). Agents read the pack skill as a file. Do not embed product packs in this binary. How to deploy and how to record green lives in `yoi skills get deploy`, the same for every product.
+产品知识在 [`packs/`](packs/)，每个 pack 一个目录：`page.mdx`（网站文章）、
+`CHECKLIST.md`、`skill/SKILL.md`（agent 读的部署 skill）、
+`reference/install.sh`（参考安装器，要人输入 yes）、`index.json`
+（下载时要拉哪些文件）。

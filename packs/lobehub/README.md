@@ -1,6 +1,6 @@
 # LobeHub 包
 
-唯一源。网站读 page.mdx，CLI 用 yoi get lobehub 拉整个目录。
+唯一源。网站读 page.mdx，agent 按 index.json 用 HTTP 拉整个目录。
 
 | 文件 | 给谁 |
 |------|------|
@@ -8,4 +8,4 @@
 | CHECKLIST.md | 它是什么、环境怎么选、服务怎么算可用 |
 | reference/install.sh | 参考安装器，要 yes |
 | skill/SKILL.md | agent 读的 skill |
-| index.json | yoi get 要下哪些文件 |
+| index.json | 下载时要拉哪些文件 |

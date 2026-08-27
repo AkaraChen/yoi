@@ -35,7 +35,8 @@ it does not install anything.
    - Reject absolute paths and anything containing `..`.
    - `GET <site>/packs/<NAME>/<rel>`.
    - Write the body to `./packs/<NAME>/<rel>`, creating parent directories.
-     Mark `.sh` files executable (`chmod 0755`); everything else `0644`.
+     Mode `0644` for every file. `.cmdspec` is not a script — do not
+     `chmod +x` it and do not pass it to a shell.
 3. The pack now lives at `./packs/NAME/`.
 
 curl sketch:
@@ -49,13 +50,15 @@ curl -fsSL --create-dirs -o "packs/$NAME/<rel>" "$site/packs/$NAME/<rel>"
 
 ## After the download
 
-Follow `packs/NAME/reference/install.sh`. The script prints what it will do
-and waits for a typed yes — do not skip that confirmation.
+Follow `packs/NAME/reference/install.cmdspec`. Interpret it (cmdspec is
+not executable — never `sh` it). Print the plan and wait for a typed yes
+before any `RUN` after the confirmation gate — do not skip that.
 
 ## Red lines
 
-- Opt-in, human-in-the-loop: ask before installing anything; install scripts
-  wait for a typed yes. Never perform or claim silent / unattended installs.
+- Opt-in, human-in-the-loop: ask before installing anything; install
+  cmdspec waits for a typed yes. Never perform or claim silent / unattended
+  installs.
 - Honest uninstall: deleting the pack directory removes the pack.
 - No bundling or cross-promotion of 2code.
 - No per-page cloud AFF — AFF may only appear in 试验场/干净机 contexts if

@@ -15,7 +15,7 @@ Hermes 是 [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-ag
 
 ## 环境/配置怎么选
 
-官方安装器覆盖 Linux / macOS / WSL2 / Termux（curl 脚本）与 Windows 原生（PowerShell）；本 pack 的 reference 脚本只走 Linux。
+官方安装器覆盖 Linux / macOS / WSL2 / Termux（curl 脚本）与 Windows 原生（PowerShell）；本 pack 的 reference cmdspec 只走 Linux。
 
 官方写明的前置（非 Windows）：
 

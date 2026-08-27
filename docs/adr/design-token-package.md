@@ -45,7 +45,10 @@
   等）与布局配置（容器宽度），这些不属于共享令牌。
 - `@yoi/design` 以 `file:` 链接进消费者，`design/` 改动后需在消费者目录
   重新 `npm install` 才会刷新 `package-lock.json`；Tailwind 构建时实时读取
-  preset 源文件，无需构建 design 包本身。
+  preset 源文件，无需构建 design 包本身。`file:` 是 symlink：preset 里
+  `require("tailwindcss-animate")` 从 `design/` 解析，所以构建前必须在
+  `design/` 自己 `npm ci`（该包有 lockfile），不能只装消费者的
+  `node_modules`。
 - `docs/adr/web-visual-system.md` 中「令牌在 `globals.css` 重写」的表述由
   本文档取代；视觉方向（暖纸底、墨色、焦橙、终端暖黑）不变。
 

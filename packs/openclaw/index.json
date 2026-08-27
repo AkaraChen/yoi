@@ -6,6 +6,6 @@
     "index.json",
     "cover.png",
     "skill/SKILL.md",
-    "reference/install.sh"
+    "reference/install.cmdspec"
   ]
 }

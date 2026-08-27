@@ -5,13 +5,17 @@ store is plain markdown under `~/.yoi/` — human-readable, agent-parseable.
 All entities are global scope; always pass `--scope global`.
 
 Fleet writes need the `yoi` binary. If it is missing, ask the human before
-installing, then:
+installing, then fetch and **interpret** the cmdspec (it is not a shell
+script — never `curl | sh`, no runner binary):
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.sh | sh
+```
+https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.cmdspec
 ```
 
-Windows:
+Read it, translate `RUN` / `ASSERT` / `IF` into real Unix commands, and
+execute those. Language: https://github.com/AkaraChen/cmdspec-spec
+
+Windows (PowerShell; cmdspec here is Unix-only):
 
 ```powershell
 irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.ps1 | iex

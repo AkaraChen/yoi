@@ -1,0 +1,49 @@
+# Linux reference install for NousResearch/hermes-agent.
+# Official path only: https://hermes-agent.nousresearch.com/install.sh
+# cmdspec — not executable. The agent interprets this document and translates
+# RUN / ASSERT into real commands. No runner binary is required.
+# Stops right after the official installer. Model setup belongs to the human.
+
+upstream_repo = "https://github.com/NousResearch/hermes-agent"
+docs_url = "https://hermes-agent.nousresearch.com/docs/getting-started/installation"
+installer_url = "https://hermes-agent.nousresearch.com/install.sh"
+
+IF ($(uname -s) != "Linux")
+  ABORT "this reference only runs on Linux (the official installer also covers macOS/WSL2/Termux/Windows, see $docs_url)"
+END
+
+IF ($(id -u) == "0")
+  ABORT "this reference refuses to run as root; use a normal user"
+END
+
+ASSERT $(which git) EXISTS "missing git — install it (userland under ~/.local, or with root: sudo apt install git curl xz-utils). Never prompt for a root password."
+ASSERT $(which curl) EXISTS "missing curl — install it, then re-read this document. Never prompt for a root password."
+ASSERT $(which xz) EXISTS "missing xz — install xz-utils, then re-read this document. Never prompt for a root password."
+
+# PLAN (print to the human before the confirmation gate):
+#   1. download the official installer: $installer_url
+#   2. run it. Per the official docs it installs uv, Python 3.11, Node.js v22,
+#      ripgrep and ffmpeg, clones the repo to ~/.hermes/hermes-agent, and puts
+#      the hermes launcher at ~/.local/bin/hermes
+#   3. stop. This procedure adds nothing beyond the official installer: no
+#      hermes setup, no model choice, no gateway. Any questions the official
+#      installer asks are answered by the human, not by an agent.
+#   Upstream repo: $upstream_repo
+#
+# CONFIRMATION GATE: obtain a typed "yes" from the human. If the answer is
+# anything else, ABORT "aborted" (cancelled — not a failure). Do not run the
+# steps below until that yes is typed.
+
+tmp = $(mktemp)
+
+TRY
+  RUN curl -fsSL $installer_url -o $tmp
+  RUN bash $tmp
+ON_FAIL
+  RUN? rm -f $tmp
+  ABORT "official hermes installer failed"
+END
+
+RUN? rm -f $tmp
+RUN echo "Installer finished. Reload the shell: source ~/.bashrc  # or ~/.zshrc" → STDERR
+# Next steps (hermes model, first chat) belong to the human; see the pack checklist.

@@ -87,7 +87,12 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: dashboard/package-lock.json
+          cache-dependency-path: |
+            design/package-lock.json
+            dashboard/package-lock.json
+      - name: Install design package deps
+        working-directory: design
+        run: npm ci
       - name: Build embedded SPA
         working-directory: dashboard
         run: npm ci && npm run build

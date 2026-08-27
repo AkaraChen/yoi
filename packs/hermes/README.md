@@ -6,6 +6,6 @@
 |------|------|
 | page.mdx | 网站文章 |
 | CHECKLIST.md | 它是什么、模型怎么选、对话怎么算可用 |
-| reference/install.sh | 参考安装器，要 yes |
+| reference/install.cmdspec | 参考安装器，要 yes |
 | skill/SKILL.md | agent 读的 skill |
 | index.json | 下载时要拉哪些文件 |

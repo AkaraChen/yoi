@@ -13,11 +13,17 @@ Ask the human before installing anything. Do not install silently.
 
 ## Install yoi-server
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.sh | sh
+Fetch and **interpret** the cmdspec (not a shell script — never `curl | sh`,
+no runner binary):
+
+```
+https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.cmdspec
 ```
 
-Windows:
+Read it, translate `RUN` / `ASSERT` / `IF` into real Unix commands, and
+execute those. Language: https://github.com/AkaraChen/cmdspec-spec
+
+Windows (PowerShell; cmdspec here is Unix-only):
 
 ```powershell
 irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.ps1 | iex
@@ -30,10 +36,10 @@ half-install.
 
 ## Install yoi-dashboard (Linux)
 
-Same Release as the CLIs. Prefer the script:
+Same Release as the CLIs. Prefer the cmdspec (interpret, do not `sh`):
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-dashboard.sh | sh
+```
+https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-dashboard.cmdspec
 ```
 
 Or download

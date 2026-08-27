@@ -1,6 +1,6 @@
 ---
 name: openclaw
-description: Install and verify OpenClaw, the personal AI assistant that runs on your own devices — runtime prerequisites, the usability bar, and the pack reference install script.
+description: Install and verify OpenClaw, the personal AI assistant that runs on your own devices — runtime prerequisites, the usability bar, and the pack reference install cmdspec.
 ---
 
 # OpenClaw
@@ -15,6 +15,6 @@ description: Install and verify OpenClaw, the personal AI assistant that runs on
 
 ## 安装
 
-用 `packs/openclaw/reference/install.sh`。脚本走官方 curl 安装器，等人输入 yes 才动手，装完即停；onboard 向导和 API key 由人自己完成。不要静默安装，不要代填密钥。
+用 `packs/openclaw/reference/install.cmdspec`（解读，不要 `sh`）。走官方 curl 安装器，等人输入 yes 才动手，装完即停；onboard 向导和 API key 由人自己完成。不要静默安装，不要代填密钥。
 
 绿了用服务器上的 `yoi-server` CLI 记一条 event（命令参考：`yoi-server skills get`）。

@@ -24,7 +24,7 @@ Docker 是开源容器运行时，上游是 Moby 项目（Apache 2.0）。官方
 - **手动 deb/rpm 包**：不能加仓库时的退路，升级也要手动
 - **get.docker.com 便捷脚本**：官方原话「只推荐用于测试和开发环境」。需要 root/sudo，自动识别发行版并配置包管理器，不支持自定义参数，不能用来升级已有安装。支持 `--dry-run` 预览步骤。脚本开源：github.com/docker/docker-install
 
-本 pack 的 reference 脚本走便捷脚本——个人机器跑起来再说，正是官方定义的适用场景。
+本 pack 的 reference cmdspec 走便捷脚本——个人机器跑起来再说，正是官方定义的适用场景。
 
 官方写明的坑：
 

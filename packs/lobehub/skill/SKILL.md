@@ -19,6 +19,6 @@ Linux，docker 与 compose 插件已装，端口 3210 / 9000 / 9001 空闲，最
 
 ## 安装
 
-用 `packs/lobehub/reference/install.sh`。脚本打印计划后必须等人输入 yes，不要静默安装。官方 setup.sh 本身交互式询问部署模式，默认 Local 直接回车即可；装完即停，面板内的配置交还给人。
+用 `packs/lobehub/reference/install.cmdspec`（解读，不要 `sh`）。打印计划后必须等人输入 yes，不要静默安装。官方 setup.sh 本身交互式询问部署模式，默认 Local 直接回车即可；装完即停，面板内的配置交还给人。
 
 绿了用服务器上的 `yoi-server` CLI 记一条 event（命令参考：`yoi-server skills get`）。

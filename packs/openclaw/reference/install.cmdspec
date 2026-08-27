@@ -1,0 +1,39 @@
+# Linux reference install for openclaw/openclaw.
+# Official path from https://docs.openclaw.ai/install — the hosted installer,
+# run with --no-onboard so interactive configuration stays with the human.
+# cmdspec — not executable. The agent interprets this document and translates
+# RUN / ASSERT into real commands. No runner binary is required.
+
+IF ($(uname -s) != "Linux")
+  ABORT "this reference only runs on Linux"
+END
+
+IF ($(id -u) == "0")
+  ABORT "do not run as root; use a normal user"
+END
+
+ASSERT $(which curl) EXISTS "curl not found; ask the human to install curl first (e.g. apt install curl)"
+ASSERT $(which bash) EXISTS "bash not found; the official installer needs bash"
+
+# PLAN (print to the human before the confirmation gate):
+#   1. run the official OpenClaw installer:
+#        curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard
+#      It detects the OS, installs Node.js if needed, and installs the
+#      openclaw CLI.
+#   2. stop. Do not run openclaw onboard, do not store API keys, do not
+#      connect channels.
+#   Upstream repo: https://github.com/openclaw/openclaw
+#   Install docs:  https://docs.openclaw.ai/install
+#
+# CONFIRMATION GATE: obtain a typed "yes" from the human. If the answer is
+# anything else, ABORT "aborted" (cancelled — not a failure). Do not run the
+# steps below until that yes is typed.
+
+TRY
+  RUN curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard
+ON_FAIL
+  ABORT "official OpenClaw installer failed"
+END
+
+RUN echo "CLI installed. The next steps are interactive — run them yourself: openclaw onboard --install-daemon ; openclaw gateway status ; openclaw dashboard" → STDERR
+# What counts as a usable assistant is in the knowledge pack, not this document.

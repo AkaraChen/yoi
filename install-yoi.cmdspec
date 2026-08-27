@@ -1,0 +1,109 @@
+# Install the client-world `yoi` CLI from the latest GitHub Release.
+#
+# cmdspec — not executable. Never `curl | sh` this file and never pass it to
+# a shell. No runner binary is required: the agent fetches this document,
+# translates RUN / ASSERT / IF into the target Unix shell, and executes those
+# commands. Windows is out of scope here — use install-yoi.ps1
+# (`irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.ps1 | iex`).
+#
+# Non-interactive: the yoi skill asks the human before this procedure starts.
+# Honor YOI_INSTALL_DIR when set.
+
+repo = "AkaraChen/yoi"
+name = "yoi"
+release_base = "https://github.com/AkaraChen/yoi/releases/latest/download"
+
+os = $(uname -s)
+arch = $(uname -m)
+
+IF ($os == "Linux")
+  os = "linux"
+ELIF ($os == "Darwin")
+  os = "darwin"
+ELIF ($os.starts_with("MINGW") OR $os.starts_with("MSYS") OR $os.starts_with("CYGWIN"))
+  ABORT "Windows: use install-yoi.ps1 (irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.ps1 | iex)"
+ELSE
+  ABORT "unsupported OS: $os"
+END
+
+IF ($arch == "x86_64" OR $arch == "amd64")
+  arch = "amd64"
+ELIF ($arch == "aarch64" OR $arch == "arm64")
+  arch = "arm64"
+ELSE
+  ABORT "unsupported architecture: $arch"
+END
+
+# Archive name is yoi_<os>_<arch>.tar.gz (no version in the filename).
+asset = "yoi_$os_$arch.tar.gz"
+asset_url = "$release_base/$asset"
+sums_url = "$release_base/checksums.txt"
+
+dest = $YOI_INSTALL_DIR
+IF ($dest IS_EMPTY)
+  dest = "$HOME/.local/bin"
+END
+
+FN download(url, out)
+  IF ($(which curl) EXISTS)
+    TRY
+      RUN curl -fsSL -o $out $url
+    ON_FAIL
+      ABORT "download failed (404 means no GitHub Release yet — push a v* tag). url: $url"
+    END
+  ELIF ($(which wget) EXISTS)
+    TRY
+      RUN wget -qO $out $url
+    ON_FAIL
+      ABORT "download failed (404 means no GitHub Release yet — push a v* tag). url: $url"
+    END
+  ELSE
+    ABORT "need curl or wget"
+  END
+END
+
+tmp = $(mktemp -d)
+archive = "$tmp/$asset"
+sums = "$tmp/checksums.txt"
+extracted = "$tmp/$name"
+staged = "$dest/.$name.new"
+installed = "$dest/$name"
+
+TRY
+  RUN echo "downloading $asset" → STDERR
+  RUN download($asset_url, $archive)
+  RUN download($sums_url, $sums)
+
+  sum_line = $(grep $asset $sums)
+  ASSERT $sum_line NOT_EMPTY "checksums.txt has no entry for $asset"
+  sum_fields = $sum_line.split(" ")
+  expected = $sum_fields[0]
+
+  IF ($(which sha256sum) EXISTS)
+    hash_line = $(sha256sum $archive)
+  ELIF ($(which shasum) EXISTS)
+    hash_line = $(shasum -a 256 $archive)
+  ELSE
+    ABORT "need sha256sum or shasum"
+  END
+  hash_fields = $hash_line.split(" ")
+  actual = $hash_fields[0]
+  IF ($actual != $expected)
+    ABORT "sha256 mismatch for $asset"
+  END
+
+  RUN tar -xzf $archive -C $tmp
+  ASSERT $extracted IS_FILE "archive missing $name"
+
+  RUN mkdir -p $dest
+  RUN cp $extracted $staged
+  RUN chmod 755 $staged
+  RUN mv $staged $installed
+ON_FAIL
+  RUN? rm -rf $tmp
+  ABORT "install failed"
+END
+
+RUN? rm -rf $tmp
+RUN echo "installed $name to $installed" → STDERR
+# If $dest is not already on PATH, tell the human to add it so `yoi` resolves.

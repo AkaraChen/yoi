@@ -1,0 +1,70 @@
+# Linux reference install for Docker Engine (official get.docker.com
+# convenience script). cmdspec — not executable. The agent interprets this
+# document and translates RUN / ASSERT into real commands. No runner binary
+# is required. Stops right after install + hello-world.
+
+upstream_repo = "https://github.com/moby/moby"
+docs_url = "https://docs.docker.com/engine/install/"
+script_url = "https://get.docker.com"
+
+IF ($(uname -s) != "Linux")
+  ABORT "this reference only runs on Linux (on Windows/macOS the official product is Docker Desktop, see $docs_url)"
+END
+
+IF ($(id -u) == "0")
+  ABORT "do not run as root; use a normal user with sudo"
+END
+
+IF ($(which docker) EXISTS)
+  ABORT "docker is already installed; the convenience script is not an upgrader, use your package manager"
+END
+
+ASSERT $(which curl) EXISTS "curl is missing; install it first"
+ASSERT $(which sudo) EXISTS "sudo is missing; the official installer needs root privileges via sudo"
+
+# Conflicting distro packages: the official docs require removing them first.
+# Debian/Ubuntu (dpkg exists): abort if any of
+#   docker.io docker-compose docker-compose-v2 docker-doc docker-buildx
+#   podman-docker containerd runc
+# is installed (dpkg status line starts with ii). Tell the human:
+#   sudo apt remove <those packages>
+# RPM (rpm exists): abort if any of
+#   docker docker-client docker-client-latest docker-common docker-latest
+#   docker-latest-logrotate docker-logrotate docker-engine
+# is installed (rpm -q succeeds). Tell the human:
+#   sudo dnf remove <those packages>
+
+# PLAN (print to the human before the confirmation gate):
+#   Follow the official convenience-script path ($docs_url):
+#   1. download $script_url (open source: github.com/docker/docker-install)
+#   2. run it with sudo. It detects this distro, configures Docker's official
+#      package repository, and installs docker-ce, the CLI, containerd, and the
+#      buildx/compose plugins. It installs dependencies without asking.
+#   3. verify with `sudo docker run hello-world`
+#   4. stop. Do not touch the docker group or any config.
+#   Official caveat: the convenience script is recommended for testing and
+#   development environments, not production. On RPM-based distros the docker
+#   service is not started automatically (sudo systemctl enable --now docker).
+#   Any sudo password prompt belongs to the human, not to an agent.
+#   Upstream repo: $upstream_repo
+#
+# CONFIRMATION GATE: obtain a typed "yes" from the human. If the answer is
+# anything else, ABORT "aborted" (cancelled — not a failure). Do not run the
+# steps below until that yes is typed.
+
+tmp = $(mktemp)
+
+TRY
+  RUN curl -fsSL $script_url -o $tmp
+  RUN sudo sh $tmp
+  RUN sudo docker run hello-world
+ON_FAIL
+  RUN? rm -f $tmp
+  ABORT "Docker convenience-script install or hello-world verify failed"
+END
+
+RUN? rm -f $tmp
+RUN echo "Docker Engine is installed and verified." → STDERR
+# Next step belongs to the human: to run docker without sudo, add themselves
+# to the docker group (`sudo usermod -aG docker $USER`) and log back in.
+# Official warning: the docker group grants root-level privileges.

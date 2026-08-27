@@ -1,0 +1,80 @@
+# Linux reference install for jnj52016/MemeSeek.
+# Official path only, from the README's "本地运行": clone, pnpm install,
+# docker compose (PostgreSQL 16), server/.env from the template, prisma
+# migrate deploy.
+# cmdspec — not executable. The agent interprets this document and translates
+# RUN / ASSERT into real commands. No runner binary is required.
+# Stops right after install. `pnpm dev` and the API key belong to the human.
+
+upstream_repo = "https://github.com/jnj52016/MemeSeek"
+clone_url = "https://github.com/jnj52016/MemeSeek.git"
+dest = "MemeSeek"
+
+IF ($(uname -s) != "Linux")
+  ABORT "this reference only runs on Linux (the README also covers Windows, see $upstream_repo)"
+END
+
+IF ($(id -u) == "0")
+  ABORT "this reference refuses to run as root; use a normal user"
+END
+
+ASSERT $(which git) EXISTS "missing git — the README requires git, Node.js 23+, pnpm 9+, and Docker Compose. Never prompt for a root password."
+ASSERT $(which node) EXISTS "missing node — Node.js 23+ is required. Never prompt for a root password."
+ASSERT $(which pnpm) EXISTS "missing pnpm — pnpm 9+ is required. Never prompt for a root password."
+ASSERT $(which docker) EXISTS "missing docker — Docker with Compose is required. Never prompt for a root password."
+
+node_ver = $(node --version)
+node_parts = $node_ver.strip_prefix("v").split(".")
+node_major = $node_parts[0]
+IF ($node_major < 23)
+  ABORT "Node.js 23+ is required (found $node_ver); upgrade Node.js and re-run"
+END
+
+pnpm_ver = $(pnpm --version)
+pnpm_parts = $pnpm_ver.split(".")
+pnpm_major = $pnpm_parts[0]
+IF ($pnpm_major < 9)
+  ABORT "pnpm 9+ is required (found $pnpm_ver); upgrade pnpm and re-run"
+END
+
+compose_ok = $(docker compose version)
+ASSERT $compose_ok NOT_EMPTY "the docker compose plugin is required (PostgreSQL runs via docker compose)"
+
+# Docker daemon must be reachable (and the user in the docker group, or use sudo).
+daemon = $(docker info)
+ASSERT $daemon NOT_EMPTY "cannot reach the Docker daemon; start it (and add your user to the docker group) first"
+
+IF ($dest EXISTS)
+  ABORT "directory ./$dest already exists; move it aside or run from another directory"
+END
+
+# PLAN (print to the human before the confirmation gate):
+#   1. clone $clone_url into ./$dest
+#   2. run pnpm install (workspace: client + server)
+#   3. start PostgreSQL 16 in Docker: docker compose up -d --wait
+#      (localhost:5432, database and user memeseek, dev password from the
+#      compose file)
+#   4. create server/.env from server/.env.example — its defaults match the
+#      compose database; no API key goes there (the key is entered later in
+#      the browser's AI settings page and stays in localStorage)
+#   5. run the database migration: pnpm --filter server exec prisma migrate deploy
+#   6. stop. Starting the app (pnpm dev) and entering the AI API key belong
+#      to the human; see the pack checklist.
+#   Upstream repo: $upstream_repo
+#
+# CONFIRMATION GATE: obtain a typed "yes" from the human. If the answer is
+# anything else, ABORT "aborted" (cancelled — not a failure). Do not run the
+# steps below until that yes is typed.
+
+TRY
+  RUN git clone $clone_url $dest
+  # cwd for the remaining commands: ./$dest
+  RUN pnpm install
+  RUN docker compose up -d --wait
+  RUN cp server/.env.example server/.env
+  RUN pnpm --filter server exec prisma migrate deploy
+ON_FAIL
+  ABORT "MemeSeek clone, install, compose, or migrate failed"
+END
+
+RUN echo "Install finished. Next steps belong to the human: cd $dest && pnpm dev ; open http://localhost:5173 and set the analysis AI (base URL, API key, model) on the AI settings page, then upload a first meme." → STDERR

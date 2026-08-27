@@ -12,7 +12,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - **PRD**: a product requirements document under `docs/prd/` describing problem, users, goals, non-goals, flows, failure behavior, and acceptance criteria.
 - **ADR**: an architecture decision record under `docs/adr/` capturing one material technical choice, alternatives, and consequences.
 - **Spec**: this file — the single source of truth for shared terminology, observable contracts, and system-wide invariants.
-- **Pack**: a product-knowledge bundle living in a directory under `packs/`, identified by its slug (directory name, `[a-z0-9][a-z0-9-]*`). A pack is listed in the storefront only if it contains `page.mdx`. A pack ships an agent-ready skill (`skill/SKILL.md`), a checklist, and a reference install script.
+- **Pack**: a product-knowledge bundle living in a directory under `packs/`, identified by its slug (directory name, `[a-z0-9][a-z0-9-]*`). A pack is listed in the storefront only if it contains `page.mdx`. A pack ships an agent-ready skill (`skill/SKILL.md`), a checklist, and a reference install cmdspec.
 - **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the product's retention and routing layer: once installed, a human request like "用 yoi 安装 NAME" routes the agent through the yoi flow. Pack delivery inside the flow is pure HTTP (curl) — no binary is a prerequisite; the storefront sells the skill, not a CLI.
 - **Storefront**: the Next.js site in `web/`. The homepage `/` is the brand landing page with a pack preview section; the full pack list lives at `/shop`.
 - **Shop filter**: In-place narrowing of the `/shop` grid by a visitor query against pack slug and excerpt. It is not a search page, not a search API, and not the yoi skill's pack search.
@@ -33,7 +33,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 - The product sold on the storefront is the **skill layer** (the yoi skill plus per-pack skills). Pack delivery is HTTP instructions inside the skill; no CLI is required for it.
 - Narrative: deployment of trending products on the user's own Linux — "三分钟跑起来，不是三天". Brand copy says "网红产品" without narrowing to agent products. The two-sided structure (初级部署 / 高级清场) from the 2026-08-13 brainstorm is not yet reflected in the storefront; the beginner deployment face leads.
-- Red lines for any user-facing surface: no silent or unattended install claims; installation is opt-in with human-in-the-loop confirmation (the skill asks before installing a CLI, the probe, or a pack). Pack `reference/install.sh` files wait for a typed yes. CLI/probe install scripts are non-interactive (`curl | sh` / `irm | iex` cannot `read` because stdin is the script). Uninstall must be honest (deleting the pack directory removes the pack); no bundling or cross-promotion of 2code; no per-page cloud AFF — AFF may only appear in 试验场/干净机 contexts if such content exists.
+- Red lines for any user-facing surface: no silent or unattended install claims; installation is opt-in with human-in-the-loop confirmation (the skill asks before installing a CLI, the probe, or a pack). Pack `reference/install.cmdspec` files wait for a typed yes. CLI/probe Unix installers are cmdspec documents (agent-interpreted, not executable; no yes-gate inside the document). Windows CLIs stay on `irm | iex` `.ps1` files. Uninstall must be honest (deleting the pack directory removes the pack); no bundling or cross-promotion of 2code; no per-page cloud AFF — AFF may only appear in 试验场/干净机 contexts if such content exists.
 - The storefront's primary call to action is installing the yoi skill (`npx skills add AkaraChen/yoi --skill yoi -g`); per-pack install is phrased as telling the agent "用 yoi 安装 <slug>".
 
 ### Web storefront
@@ -84,13 +84,12 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 - Two CLIs exist, both ctxl-generated from root schemas: `yoi` (client-world fleet inventory, `yoi.schema.json`) and `yoi-server` (server-world fact store, `yoi-server.schema.json`). Generated output lands in `generated/<name>` and is replaced in place on regeneration.
 - Pack delivery is pure HTTP inside the yoi skill (`skills/yoi/references/packs.md`), not a binary. Base URL resolution: `YOI_PACKS` environment variable → built-in default `https://yoi-sigma.vercel.app`; a `/packs` path suffix is trimmed to the site root so one override value serves all requests.
-- Pack list/search fetch `GET <base>/packs.json`; search filters client-side (case-insensitive substring on slug or excerpt). Pack get fetches `<base>/packs/<slug>/index.json` and downloads every listed file into `./packs/<slug>/`, marking `.sh` files executable; it does not install anything. Pack delivery does not require a yoi CLI.
+- Pack list/search fetch `GET <base>/packs.json`; search filters client-side (case-insensitive substring on slug or excerpt). Pack get fetches `<base>/packs/<slug>/index.json` and downloads every listed file into `./packs/<slug>/` at mode `0644` (`.cmdspec` is not a script and is not marked executable); it does not install anything. Pack delivery does not require a yoi CLI.
 - Binary distribution: a `v*` tag publishes a GitHub Release. Unauthenticated stable URLs are `https://github.com/AkaraChen/yoi/releases/latest/download/<asset>`. Asset names do not include the version. Platforms: `yoi` and `yoi-server` for linux/darwin/windows × amd64/arm64 (`tar.gz`, except Windows `.zip` with `.exe`); `yoi-dashboard` at least linux amd64 and linux arm64 (`tar.gz`). The Release also has `checksums.txt` (sha256 of every archive).
-- Install entrypoints (raw.githubusercontent.com, non-interactive; the skill asks the human first):
-  - `https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.sh`
-  - `https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.sh`
-  - Windows: the matching `install-yoi.ps1` / `install-yoi-server.ps1`
-  - Optional Linux-only `install-yoi-dashboard.sh` for the probe
+- Install entrypoints (raw.githubusercontent.com; the skill asks the human first):
+  - Unix: `https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.cmdspec` and `install-yoi-server.cmdspec` — cmdspec documents for the agent to interpret, not `curl | sh`
+  - Windows: the matching `install-yoi.ps1` / `install-yoi-server.ps1` (`irm | iex`)
+  - Optional Linux-only `install-yoi-dashboard.cmdspec` for the probe
 - Default install destinations: `${YOI_INSTALL_DIR:-$HOME/.local/bin}` (Unix, no root) and `%LOCALAPPDATA%\yoi\bin` (Windows; add to PATH). Overwrite is upgrade. Missing Release, missing asset, or 404 is a hard failure with no half-install. `releases/latest` follows GitHub's latest non-prerelease (currently the newest `v*` after `v0.1.0`).
 - The probe binary is `yoi-dashboard`. On Linux the server skill encourages a systemd user or system unit, bind `127.0.0.1:8788`, password from `YOI_DASHBOARD_PASSWORD` (the compile-time default `yoi` is development-only), store `-store` / `YOI_DASHBOARD_STORE` / `~/.yoi`. Windows/macOS probe service setup is unspecified.
 

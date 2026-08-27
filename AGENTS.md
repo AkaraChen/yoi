@@ -65,17 +65,17 @@ Server CLI (ctxl-generated, schema `yoi-server.schema.json`):
 
 - Generate: `go run github.com/AkaraChen/ctxl/cmd/ctxl@latest generate yoi-server.schema.json`
 - Build: `cd generated/yoi-server && go build -o yoi-server .`
-- Install (ask first): `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.sh | sh`
+- Install (ask first): fetch and interpret `https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.cmdspec` (cmdspec is not executable — never `curl | sh`; no runner binary)
 - Windows: `irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.ps1 | iex`
 
 Client CLI (ctxl-generated, schema `yoi.schema.json`):
 
 - Generate: `go run github.com/AkaraChen/ctxl/cmd/ctxl@latest generate yoi.schema.json`
 - Build: `cd generated/yoi && go build -o yoi .`
-- Install (ask first): `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.sh | sh`
+- Install (ask first): fetch and interpret `https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.cmdspec` (cmdspec is not executable — never `curl | sh`; no runner binary)
 - Windows: `irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.ps1 | iex`
 
-Linux probe from the same GitHub Release: `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-dashboard.sh | sh`. Push a `v*` tag to publish assets (see `.github/workflows/release.yml`). A latest URL 404s if that Release does not contain the named asset.
+Linux probe from the same GitHub Release: fetch and interpret `https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-dashboard.cmdspec`. Push a `v*` tag to publish assets (see `.github/workflows/release.yml`). A latest URL 404s if that Release does not contain the named asset.
 
 Generation output lands in `generated/<name>` next to the schema and is replaced in place on regeneration. When a local ctxl checkout is available, `cd ../ctxl && go run ./cmd/ctxl generate ...` works too — the schema pins `generation.ctxl_version`, so no published ctxl release is required.
 

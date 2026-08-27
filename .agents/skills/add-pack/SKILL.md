@@ -1,6 +1,6 @@
 ---
 name: add-pack
-description: Add a new product pack under packs/ for the yoi storefront by reading the product's official sources first and mirroring how the official site presents it. Use when the user asks to add, create, or author a pack for a product — covering page.mdx, CHECKLIST.md, skill/SKILL.md, reference/install.sh, index.json, and the cover image.
+description: Add a new product pack under packs/ for the yoi storefront by reading the product's official sources first and mirroring how the official site presents it. Use when the user asks to add, create, or author a pack for a product — covering page.mdx, CHECKLIST.md, skill/SKILL.md, reference/install.cmdspec, index.json, and the cover image.
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 - 禁止复制现有 pack 的结构。「它是什么 / 核心能力」只是 hermes 恰好长这样，不是模板。
 - `page.mdx` 的分节、详略、语气跟随官方首页与 README：官方先讲理念就先讲理念；官方用功能列表就用功能列表；官方有 slogan 就化用 slogan。
-- `CHECKLIST.md`、`skill/SKILL.md`、`reference/install.sh` 的内容必须从官方安装文档 / quickstart / FAQ 里读出来。不同产品的这些文件长得不一样是正常的，长一样才可疑。
+- `CHECKLIST.md`、`skill/SKILL.md`、`reference/install.cmdspec` 的内容必须从官方安装文档 / quickstart / FAQ 里读出来。不同产品的这些文件长得不一样是正常的，长一样才可疑。
 
 ## 流程
 
@@ -47,14 +47,14 @@ disable-model-invocation: true
 ### 4. skill/SKILL.md（agent skill）
 
 - frontmatter：`name` = slug；`description` 用英文一句话说清覆盖什么
-- 正文是 CHECKLIST 的蒸馏：先读 CHECKLIST、可用标准、安装走 reference 脚本
+- 正文是 CHECKLIST 的蒸馏：先读 CHECKLIST、可用标准、安装走 reference cmdspec
 - 结尾固定：绿了用服务器上的 `yoi-server` CLI 记一条 event（`yoi-server skills get`）
 
-### 5. reference/install.sh（参考安装器）
+### 5. reference/install.cmdspec（参考安装器）
 
+- 用 cmdspec 写（https://github.com/AkaraChen/cmdspec-spec）：`RUN` / `ASSERT` / `IF` / `TRY`，不是 bash。文档不可执行，不要 `chmod +x`，不要交给 `sh`
 - 安装路径必须是官方文档里写的那条（curl 安装器 / npm 全局包 / docker compose……），不要发明
-- 固定安全骨架：仅 Linux；拒绝 root；动手前检查前置依赖（node / docker / 端口），缺了就停并说明让人装什么；打印将要做的事；等输入 `yes` 才动手；装完即停，交互式配置交还给人
-- `chmod +x`
+- 固定安全骨架：仅 Linux；拒绝 root；动手前检查前置依赖（node / docker / 端口），缺了就停并说明让人装什么；打印将要做的事；等输入 `yes` 才动手（写在 confirmation gate 注释里）；装完即停，交互式配置交还给人
 
 ### 6. 封面
 

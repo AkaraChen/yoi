@@ -49,7 +49,7 @@ get/list/search 子命令承载，带来两个持续成本：
 ## 权衡与后果
 
 - 没有任何 pack 二进制需要分发；agent 只需 curl。代价是下载算法
-  （index.json 清单、路径校验、`.sh` 加执行位）以散文+配方形式维护在
+  （index.json 清单、路径校验、一律 `0644`；`.cmdspec` 不加执行位）以散文+配方形式维护在
   skill 里，没有编译期保障——pack-trial 流程是唯一回归网。
 - client/server 两个 ctxl CLI 与探针的二进制分发见
   docs/adr/cli-binary-distribution.md；本 ADR 只约束 pack 投递仍是

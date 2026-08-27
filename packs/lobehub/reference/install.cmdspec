@@ -1,0 +1,61 @@
+# Linux reference install for lobehub/lobehub (official Docker Compose path).
+# cmdspec — not executable. The agent interprets this document and translates
+# RUN / ASSERT into real commands. No runner binary is required.
+# Does not configure model providers.
+
+upstream_repo = "https://github.com/lobehub/lobehub"
+setup_url = "https://lobe.li/setup.sh"
+
+IF ($(uname -s) != "Linux")
+  ABORT "this reference only runs on Linux"
+END
+
+IF ($(id -u) == "0")
+  ABORT "do not run as root; use a normal user"
+END
+
+ASSERT $(which docker) EXISTS "docker not found; install Docker first"
+
+# docker compose plugin must be present (not the old docker-compose binary).
+compose_ok = $(docker compose version)
+ASSERT $compose_ok NOT_EMPTY "docker compose plugin not found"
+
+# If ss is available, abort when 3210, 9000, or 9001 is already listening.
+FOR port IN [3210, 9000, 9001]
+  ASSERT ":$port " NOT_IN $(ss -ltn) "port $port is already in use"
+END
+
+# PLAN (print to the human before the confirmation gate):
+#   Follow the official Docker Compose quickstart
+#   (https://lobehub.com/docs/self-hosting/platform/docker-compose):
+#   1. create ./lobehub and fetch the official setup script ($setup_url)
+#   2. run it from ./lobehub; it interactively asks for a deployment mode
+#      (default: Local, localhost-only) and writes docker-compose.yml, .env
+#      and generated secrets
+#   3. run docker compose up -d (pulls images, starts the stack)
+#   4. stop. Do not configure model providers or touch the admin panel.
+#   Upstream repo: $upstream_repo
+#   Official minimum: 2 CPU cores, 4 GB RAM, 20 GB disk.
+#   The setup script prints a configuration report (service URLs, generated
+#   passwords) at the end — tell the human to save it.
+#
+# CONFIRMATION GATE: obtain a typed "yes" from the human. If the answer is
+# anything else, ABORT "aborted" (cancelled — not a failure). Do not run the
+# steps below until that yes is typed.
+
+RUN mkdir -p lobehub
+setup = $(mktemp)
+
+TRY
+  RUN curl -fsSL $setup_url -o $setup
+  # cwd for the next two commands: ./lobehub
+  RUN bash $setup
+  RUN docker compose up -d
+ON_FAIL
+  RUN? rm -f $setup
+  ABORT "lobehub setup or compose up failed"
+END
+
+RUN? rm -f $setup
+RUN echo "Stack is starting. Watch docker logs -f lobehub for database migration pass and Ready, then open http://localhost:3210." → STDERR
+# Model provider keys are configured by the human in the panel, not here.

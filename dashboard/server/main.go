@@ -82,7 +82,8 @@ type historyPoint struct {
 }
 
 type server struct {
-	password string
+	password  string
+	storeRoot string
 
 	mu       sync.Mutex
 	sessions map[string]bool
@@ -96,13 +97,14 @@ type server struct {
 func main() {
 	addr := flag.String("addr", "127.0.0.1:8788", "listen address (localhost only by default)")
 	password := flag.String("password", envOr("YOI_DASHBOARD_PASSWORD", "yoi"), "panel password (env YOI_DASHBOARD_PASSWORD)")
+	storeRoot := flag.String("store", envOr("YOI_DASHBOARD_STORE", defaultStoreRoot()), "yoi-server fact store directory (env YOI_DASHBOARD_STORE)")
 	flag.Parse()
 
 	if !strings.HasPrefix(*addr, "127.0.0.1") && !strings.HasPrefix(*addr, "localhost") {
 		log.Printf("warning: listening on %s, the panel is meant to be localhost-only", *addr)
 	}
 
-	s := &server{password: *password, sessions: map[string]bool{}}
+	s := &server{password: *password, storeRoot: *storeRoot, sessions: map[string]bool{}}
 	s.collect() // one synchronous sample so the API never serves zeros at boot
 	go s.runSampler()
 
@@ -117,9 +119,11 @@ func main() {
 	mux.HandleFunc("GET /api/server/info", s.withAuth(s.handleServerInfo))
 	mux.HandleFunc("GET /api/server/metrics", s.withAuth(s.handleServerMetrics))
 	mux.HandleFunc("GET /api/server/history", s.withAuth(s.handleServerHistory))
+	mux.HandleFunc("GET /api/services", s.withAuth(s.handleServices))
+	mux.HandleFunc("GET /api/services/{id}", s.withAuth(s.handleService))
 	mux.Handle("/", spaHandler(static))
 
-	log.Printf("yoi dashboard listening on http://%s", *addr)
+	log.Printf("yoi dashboard listening on http://%s (store %s)", *addr, *storeRoot)
 	log.Fatal(http.ListenAndServe(*addr, mux))
 }
 
@@ -128,6 +132,14 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func defaultStoreRoot() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ".yoi"
+	}
+	return home + "/.yoi"
 }
 
 func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -189,39 +201,35 @@ func (s *server) withAuth(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (s *server) handleServerInfo(w http.ResponseWriter, r *http.Request) {
-	hostInfo, err := host.Info()
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
+	// Collect each field independently. One denied syscall (boot time on
+	// some macOS sandboxes) must not 500 the whole page — the ADR says
+	// a failed field is empty/zero and the envelope still returns 200.
+	info := serverInfo{Virtualization: "bare-metal"}
+	if h, err := os.Hostname(); err == nil {
+		info.Hostname = h
 	}
-	cpuInfos, err := cpu.Info()
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
+	if plat, _, ver, err := host.PlatformInformation(); err == nil {
+		info.OS = strings.TrimSpace(plat + " " + ver)
 	}
-	cores, err := cpu.Counts(true)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
+	if k, err := host.KernelVersion(); err == nil {
+		info.Kernel = k
 	}
-	model := "unknown"
-	if len(cpuInfos) > 0 {
-		model = cpuInfos[0].ModelName
+	if a, err := host.KernelArch(); err == nil {
+		info.Arch = a
 	}
-	virt := hostInfo.VirtualizationSystem
-	if virt == "" {
-		virt = "bare-metal"
+	if system, _, err := host.Virtualization(); err == nil && system != "" {
+		info.Virtualization = system
 	}
-	writeJSON(w, serverInfo{
-		Hostname:       hostInfo.Hostname,
-		OS:             strings.TrimSpace(hostInfo.Platform + " " + hostInfo.PlatformVersion),
-		Kernel:         hostInfo.KernelVersion,
-		Arch:           hostInfo.KernelArch,
-		CPUModel:       model,
-		CPUCores:       cores,
-		Virtualization: virt,
-		BootTime:       time.Unix(int64(hostInfo.BootTime), 0).Format(time.RFC3339),
-	})
+	if bt, err := host.BootTime(); err == nil && bt > 0 {
+		info.BootTime = time.Unix(int64(bt), 0).Format(time.RFC3339)
+	}
+	if cpuInfos, err := cpu.Info(); err == nil && len(cpuInfos) > 0 {
+		info.CPUModel = cpuInfos[0].ModelName
+	}
+	if cores, err := cpu.Counts(true); err == nil {
+		info.CPUCores = cores
+	}
+	writeJSON(w, info)
 }
 
 func (s *server) handleServerMetrics(w http.ResponseWriter, r *http.Request) {

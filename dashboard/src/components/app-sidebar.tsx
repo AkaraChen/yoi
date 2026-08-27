@@ -65,19 +65,29 @@ export const AppSidebar: FC = () => {
           <SidebarGroupLabel>服务</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {services.data?.map((service) => (
-                <SidebarMenuItem key={service.id}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === `/services/${service.id}`}
-                  >
-                    <NavLink to={`/services/${service.id}`}>
-                      <StatusDot status={service.status} />
-                      <span>{service.name}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )) ??
+              {services.data ? (
+                services.data.length > 0 ? (
+                  services.data.map((service) => (
+                    <SidebarMenuItem key={service.id}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location.pathname === `/services/${service.id}`}
+                      >
+                        <NavLink to={`/services/${service.id}`}>
+                          <StatusDot status={service.status} />
+                          <span>{service.name}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                ) : (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton disabled>
+                      <span className="text-muted-foreground">暂无服务</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              ) : (
                 Array.from({ length: 3 }, (_, i) => (
                   <SidebarMenuItem key={i}>
                     <SidebarMenuButton disabled>
@@ -85,7 +95,8 @@ export const AppSidebar: FC = () => {
                       <Skeleton className="h-3 w-16" />
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+                ))
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

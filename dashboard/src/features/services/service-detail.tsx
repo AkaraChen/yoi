@@ -7,8 +7,9 @@ import { formatRelative } from "@/lib/format";
 import { PageHeader } from "@/components/page-header";
 import { StatusDot } from "@/components/status-dot";
 import { statusLabel } from "@/lib/status";
-import { AuditLog } from "@/features/services/audit-log";
-import { ResourceTable } from "@/features/services/resource-table";
+import { EventLog } from "@/features/services/event-log";
+import { ReleaseList } from "@/features/services/release-list";
+import { SpecCard } from "@/features/services/spec-card";
 import { ServiceRail } from "@/features/services/service-rail";
 
 export const ServiceDetail: FC = () => {
@@ -41,14 +42,15 @@ export const ServiceDetail: FC = () => {
             description={
               <>
                 {statusLabel[s.status]}
-                {s.startedAt && <> · 启动于 {formatRelative(s.startedAt)}</>}
+                {s.createdAt && <> · 创建于 {formatRelative(s.createdAt)}</>}
               </>
             }
           />
           <div className="grid items-start gap-4 lg:grid-cols-[1fr_260px]">
             <div className="flex min-w-0 flex-col gap-4">
-              <ResourceTable resources={s.resources} />
-              <AuditLog entries={s.audit} />
+              <SpecCard spec={s.spec} />
+              <ReleaseList releases={s.releases} />
+              <EventLog events={s.events} />
             </div>
             <ServiceRail service={s} />
           </div>

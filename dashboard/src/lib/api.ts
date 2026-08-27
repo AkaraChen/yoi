@@ -1,24 +1,36 @@
 /**
- * Data boundary for the dashboard. Server info/metrics and auth are served by
- * the Go probe (dashboard/server); services still resolve with mock data until
- * the yoi CLI data model lands (see docs/adr/dashboard-frontend-stack.md).
+ * Data boundary for the dashboard. Server info/metrics, auth, and services
+ * are all served by the Go probe (dashboard/server); services read the
+ * yoi-server fact store (~/.yoi) via GET /api/services[/<id>].
  */
 
 export const SESSION_KEY = "yoi-dashboard-authed";
+
+class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, init);
   if (res.status === 401) {
     sessionStorage.removeItem(SESSION_KEY);
     location.reload();
-    throw new Error("not authenticated");
+    throw new ApiError(401, "not authenticated");
   }
   if (!res.ok) {
-    throw new Error(`request failed: ${res.status}`);
+    throw new ApiError(res.status, `request failed: ${res.status}`);
   }
   return res.json() as Promise<T>;
 }
 
+// Only "running" and "stopped" occur today: the status is the service's
+// desired_state (intent), and "removed" services are filtered out by the
+// probe. "degraded" stays in the type for when live state lands.
 export type ServiceStatus = "running" | "degraded" | "stopped";
 
 export interface ServerInfo {
@@ -59,94 +71,53 @@ export interface ServiceSummary {
   status: ServiceStatus;
 }
 
-export interface ServiceResource {
-  kind: "container" | "process";
-  name: string;
-  status: string;
-  cpuPercent: number;
-  memBytes: number;
-}
-
-export interface AuditEntry {
-  id: string;
-  ts: string;
-  action: string;
-  result: "green" | "red";
-  detail: string;
-}
-
-export type ServiceLinkKind = "website" | "docs" | "github" | "grafana";
-
 export interface ServiceLink {
-  kind: ServiceLinkKind;
+  kind: string;
   label: string;
   url: string;
 }
 
-export interface Service extends ServiceSummary {
-  startedAt: string | null;
-  resources: ServiceResource[];
-  audit: AuditEntry[];
-  links: ServiceLink[];
+/** The service spec is agent-written free-form JSON; known keys are typed,
+ *  anything else passes through. */
+export interface ServiceSpec {
+  ports?: number[];
+  env?: Record<string, string>;
+  resources?: Record<string, string>;
+  health_check?: { endpoint?: string; expect?: number };
+  links?: ServiceLink[];
+  [key: string]: unknown;
 }
 
-const GiB = 1024 ** 3;
+export interface Release {
+  id: string;
+  seq: string;
+  status: "pending" | "active" | "failed" | "superseded";
+  image: string;
+  createdBy: string;
+  createdAt: string;
+  plan: Record<string, unknown> | null;
+  config: Record<string, unknown> | null;
+  outcome: Record<string, unknown> | null;
+}
 
-const services: Service[] = [
-  {
-    id: "hermes",
-    name: "Hermes",
-    status: "running",
-    startedAt: new Date(Date.now() - 3 * 24 * 3600_000).toISOString(),
-    resources: [
-      { kind: "container", name: "hermes-server", status: "running", cpuPercent: 4.2, memBytes: 0.42 * GiB },
-      { kind: "container", name: "hermes-postgres", status: "running", cpuPercent: 1.1, memBytes: 0.18 * GiB },
-      { kind: "process", name: "hermes-worker", status: "running", cpuPercent: 0.6, memBytes: 0.09 * GiB },
-    ],
-    audit: [
-      { id: "a3", ts: new Date(Date.now() - 3 * 24 * 3600_000).toISOString(), action: "deploy", result: "green", detail: "v1.4.2 部署完成，健康检查通过" },
-      { id: "a2", ts: new Date(Date.now() - 3 * 24 * 3600_000 - 95_000).toISOString(), action: "deploy", result: "red", detail: "v1.4.2 首次启动失败：端口 8787 被占用" },
-      { id: "a1", ts: new Date(Date.now() - 11 * 24 * 3600_000).toISOString(), action: "deploy", result: "green", detail: "v1.4.1 部署完成" },
-    ],
-    links: [
-      { kind: "website", label: "官网", url: "https://example.com" },
-      { kind: "grafana", label: "Grafana", url: "http://127.0.0.1:3001" },
-      { kind: "github", label: "GitHub", url: "https://github.com/example/hermes" },
-    ],
-  },
-  {
-    id: "lobehub",
-    name: "LobeHub",
-    status: "degraded",
-    startedAt: new Date(Date.now() - 26 * 3600_000).toISOString(),
-    resources: [
-      { kind: "container", name: "lobe-chat", status: "running", cpuPercent: 12.8, memBytes: 0.95 * GiB },
-      { kind: "container", name: "lobe-postgres", status: "restarting", cpuPercent: 0.2, memBytes: 0.11 * GiB },
-    ],
-    audit: [
-      { id: "b2", ts: new Date(Date.now() - 26 * 3600_000).toISOString(), action: "deploy", result: "green", detail: "v1.96.3 部署完成" },
-      { id: "b1", ts: new Date(Date.now() - 40 * 3600_000).toISOString(), action: "restart", result: "red", detail: "lobe-postgres 内存超限被 OOM killer 终止" },
-    ],
-    links: [
-      { kind: "website", label: "官网", url: "https://example.com" },
-      { kind: "docs", label: "文档", url: "https://example.com/docs" },
-    ],
-  },
-  {
-    id: "openclaw",
-    name: "OpenClaw",
-    status: "stopped",
-    startedAt: null,
-    resources: [{ kind: "process", name: "openclaw-agent", status: "stopped", cpuPercent: 0, memBytes: 0 }],
-    audit: [
-      { id: "c1", ts: new Date(Date.now() - 6 * 24 * 3600_000).toISOString(), action: "stop", result: "green", detail: "手动停止，等待重新部署" },
-    ],
-    links: [],
-  },
-];
+export interface ServiceEvent {
+  id: number;
+  ts: string;
+  service: string;
+  release?: string;
+  actor: string;
+  kind: string;
+  summary: string;
+  data?: Record<string, unknown>;
+}
 
-function delay(ms = 160) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export interface Service extends ServiceSummary {
+  packRef: string;
+  createdAt: string;
+  spec: ServiceSpec;
+  links: ServiceLink[];
+  releases: Release[];
+  events: ServiceEvent[];
 }
 
 export async function login(password: string): Promise<boolean> {
@@ -185,11 +156,16 @@ export async function getServerHistory(): Promise<ServerHistory> {
 }
 
 export async function getServices(): Promise<ServiceSummary[]> {
-  await delay();
-  return services.map(({ id, name, status }) => ({ id, name, status }));
+  return apiFetch<ServiceSummary[]>("/api/services");
 }
 
 export async function getService(id: string): Promise<Service | null> {
-  await delay();
-  return services.find((s) => s.id === id) ?? null;
+  try {
+    return await apiFetch<Service>(`/api/services/${encodeURIComponent(id)}`);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      return null;
+    }
+    throw err;
+  }
 }

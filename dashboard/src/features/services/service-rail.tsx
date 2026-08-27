@@ -3,10 +3,10 @@ import { BookOpen, ChartColumn, ExternalLink, FolderGit2, Globe } from "lucide-r
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusDot } from "@/components/status-dot";
 import { statusLabel } from "@/lib/status";
-import type { Service, ServiceLinkKind } from "@/lib/api";
+import type { Service } from "@/lib/api";
 import { formatRelative } from "@/lib/format";
 
-const linkIcon: Record<ServiceLinkKind, typeof Globe> = {
+const linkIcon: Record<string, typeof Globe> = {
   website: Globe,
   docs: BookOpen,
   github: FolderGit2,
@@ -18,9 +18,6 @@ type ServiceRailProps = {
 };
 
 export const ServiceRail: FC<ServiceRailProps> = ({ service }) => {
-  const containers = service.resources.filter((r) => r.kind === "container").length;
-  const processes = service.resources.filter((r) => r.kind === "process").length;
-
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -29,28 +26,28 @@ export const ServiceRail: FC<ServiceRailProps> = ({ service }) => {
         </CardHeader>
         <CardContent className="flex flex-col gap-2 p-4 pt-0 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">当前</span>
+            <span className="text-muted-foreground">期望状态</span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot status={service.status} />
               {statusLabel[service.status]}
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">资源</span>
-            <span className="tabular-nums">
-              {containers} 容器 · {processes} 进程
-            </span>
-          </div>
-          {service.startedAt && (
+          {service.packRef && (
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">启动</span>
-              <span>{formatRelative(service.startedAt)}</span>
+              <span className="text-muted-foreground">Pack</span>
+              <span className="font-mono text-xs">{service.packRef}</span>
             </div>
           )}
-          {service.audit[0] && (
+          {service.createdAt && (
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">最近部署</span>
-              <span>{formatRelative(service.audit[0].ts)}</span>
+              <span className="text-muted-foreground">创建</span>
+              <span>{formatRelative(service.createdAt)}</span>
+            </div>
+          )}
+          {service.events[0] && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">最近事件</span>
+              <span>{formatRelative(service.events[0].ts)}</span>
             </div>
           )}
         </CardContent>

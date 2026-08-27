@@ -31,9 +31,21 @@ Dashboard 的服务器状态部分需要真实指标（PRD `docs/prd/dashboard.m
      virtualization/bootTime
    - `GET /api/server/metrics` → cpuPercent/mem/swap/disk/netRate+total/
      tcp+udpConns/processCount/load1·5·15/uptimeSec
+   - `GET /api/services` → `[{id, name, status}]`（status 即
+     `desired_state`，`removed` 不进列表）
+   - `GET /api/services/{id}` → `{id, name, status, packRef, createdAt,
+     spec, links, releases, events}`；不存在或已 removed → 404 JSON
 5. **网络速率**由相邻两次采样差分得出；进程启动后的第一次采样速率为 0，
    不报「自开机以来平均值」这种误导性数字。
-6. **开发期**：Vite dev server 把 `/api` 代理到 `127.0.0.1:8788`，前端
+6. **服务数据只读自 `~/.yoi/` store**（`dashboard/server/store/` 包）：
+   行级 frontmatter 解析（`---` 之间 `key: value`，与 ctxl 写出的扁平
+   约定一致）、body 里 `## Section` 下的 ```json 围栏块、events.ndjson
+   逐行解析。刻意不引 YAML 库——frontmatter 只有扁平字符串，根 go.mod
+   保持只有 gopsutil 一个直接依赖。store 路径优先级：`-store` flag →
+   `YOI_DASHBOARD_STORE` → `~/.yoi`。store 目录缺失 = 空列表，不是错误；
+   坏行/坏块容忍为零值，不让手改过的文件打挂整个接口。Release 按
+   created_at 倒序（并列时 seq 倒序），Event 按 ts 倒序。
+7. **开发期**：Vite dev server 把 `/api` 代理到 `127.0.0.1:8788`，前端
    无跨域问题，cookie 同源流转。
 
 ## 备选方案
@@ -50,10 +62,14 @@ Dashboard 的服务器状态部分需要真实指标（PRD `docs/prd/dashboard.m
 - 内存会话意味着重启探针后所有用户需重新登录——单用户场景可接受。
 - 默认密码 `yoi` 是开发便利，部署文档（随数据模型设计）必须引导用户
   设置 `YOI_DASHBOARD_PASSWORD`。
-- `net.Connections` 在部分系统需要权限；采集单项失败时该字段为 0，
-  接口整体仍返回 200（前端按当前值展示，不因单项失败整页报错）。
-- 服务相关的 API（列表/详情/audit log）待 yoi CLI 数据模型定稿后追加，
-  前端对应请求函数目前仍是 mock。
+- `net.Connections` 与 `host.BootTime` 在部分系统（含 macOS 沙箱）需要
+  权限；采集单项失败时该字段为空/0，接口整体仍返回 200（前端按当前值
+  展示，不因单项失败整页骨架屏）。`GET /api/server/info` 按字段独立采集，
+  不把 `host.Info()` 的整体失败当成 500。
+- 服务 API 已落地（决策 4/6）：读 `~/.yoi/` 真实 store，前端 mock 层
+  移除。状态展示的是 `desired_state`（意图），live 实况（容器/进程的
+  实时占用）刻意不做——探针每次请求重读文件，store 更新即所见，但
+  文件本身由 yoi-server CLI 写，探针不写。
 
 ## 验证
 

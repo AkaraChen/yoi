@@ -67,9 +67,12 @@ export const ServerOverview: FC = () => {
         description={
           info.data ? (
             <>
-              {info.data.hostname} · {info.data.os} · 内核 {info.data.kernel} ·{" "}
-              {info.data.arch} · {info.data.virtualization}
+              {[info.data.hostname, info.data.os, info.data.kernel && `内核 ${info.data.kernel}`, info.data.arch, info.data.virtualization]
+                .filter(Boolean)
+                .join(" · ")}
             </>
+          ) : info.isError ? (
+            "主机信息暂时不可用"
           ) : (
             <Skeleton className="mt-1 inline-block h-4 w-72" />
           )
@@ -138,11 +141,17 @@ export const ServerOverview: FC = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            {m && info.data && (
+            {m && (
               <>
-                已运行 {formatUptime(m.uptimeSec)} · 启动于{" "}
-                {new Date(info.data.bootTime).toLocaleString("zh-CN", { hour12: false })} ·
-                每 3 秒自动刷新
+                已运行 {formatUptime(m.uptimeSec)}
+                {info.data?.bootTime && (
+                  <>
+                    {" "}
+                    · 启动于{" "}
+                    {new Date(info.data.bootTime).toLocaleString("zh-CN", { hour12: false })}
+                  </>
+                )}{" "}
+                · 每 3 秒自动刷新
               </>
             )}
           </p>

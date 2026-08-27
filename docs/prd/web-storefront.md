@@ -33,7 +33,8 @@ CLI 只是交付工具，由 skill 流程按需引导安装（装前先问，不
 
 ## 非目标
 
-- 不做购物车/结算/账号/站内搜索/筛选、不展示定价（pack 免费）。
+- 不做购物车/结算/账号、不做全站搜索或独立搜索页、不展示定价（pack 免费）。
+  `/shop` 货架就地过滤见 `docs/prd/shop-filter.md`。
 - 不体现「初级/高级」双面结构（gist 开放问题 #5，未选型）。
 - 不放云 AFF（无试验场内容语境；红线见 spec.md）。
 - 封面素材仅限 pack 目录内的 `cover.*` 官方图，不另建素材库（见 `docs/adr/pack-covers.md`）。
@@ -61,7 +62,8 @@ CLI 只是交付工具，由 skill 流程按需引导安装（装前先问，不
 ### `/shop` 全部 Pack
 
 1. 页头：「全部 Pack」大标题 + 一句话说明 + 总数（共 N 个 Pack）。
-2. 商品卡网格：全量 pack，卡片与首页预览同款（ProductCard）。
+2. 商品卡网格：默认全量 pack，卡片与首页预览同款（ProductCard）。
+   页内可按 `q` 就地过滤，契约见 `docs/prd/shop-filter.md`。
 3. 入口：吸顶导航的 Shop 链接、首页 hero「浏览 Pack」、首页预览区
    「查看全部」、详情页面包屑「全部 Pack」、页脚「全部 Pack」均指向
    `/shop`。

@@ -8,9 +8,13 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+/dist
 dist-ssr
 *.local
+
+# Vite writes the SPA here; keep a placeholder so go:embed all:dist compiles.
+server/dist/*
+!server/dist/.gitkeep
 
 # Editor directories and files
 .vscode/*

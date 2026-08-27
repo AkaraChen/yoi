@@ -24,7 +24,15 @@ curl，没有任何二进制要装。
   schema：`yoi.schema.json`），store 是 `~/.yoi/` 下的纯 markdown。
 - **Web**：`web/` storefront，只读 `packs/` 目录。
 
-两个 CLI 的生成与构建命令见 AGENTS.md；二进制分发是未来工作。
+两个 CLI 的生成与构建命令见 AGENTS.md。发布后的安装（先问人，不要静默装）：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.sh | sh
+curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.sh | sh
+```
+
+Windows：`install-yoi.ps1` / `install-yoi-server.ps1`（`irm ... | iex`）。
+Linux 探针：`install-yoi-dashboard.sh`。资产来自 GitHub `releases/latest`；对不上当前 Release 的文件名就会 404。
 
 ## Pack
 

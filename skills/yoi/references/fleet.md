@@ -4,8 +4,22 @@ The `yoi` CLI manages this dev machine's inventory of managed servers. The
 store is plain markdown under `~/.yoi/` — human-readable, agent-parseable.
 All entities are global scope; always pass `--scope global`.
 
-Binary distribution of the client CLI is future work; until then it is built
-from source (see the repo's AGENTS.md for generate/build commands).
+Fleet writes need the `yoi` binary. If it is missing, ask the human before
+installing, then:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.sh | sh
+```
+
+Windows:
+
+```powershell
+irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.ps1 | iex
+```
+
+Unix dest is `${YOI_INSTALL_DIR:-$HOME/.local/bin}` (no root). Windows dest
+is `%LOCALAPPDATA%\yoi\bin` — add it to PATH. Overwrite is upgrade. A 404
+means no GitHub Release exists yet. Do not install silently.
 
 ## Entities
 

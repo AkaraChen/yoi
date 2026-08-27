@@ -14,7 +14,8 @@
       "name": "yoi-server-store",
       "description": "Manage on-server deployment facts (services, releases, events) through the yoi-server context CLI.",
       "allowed-tools": "Bash(yoi-server:*)"
-    }
+    },
+    {"type": "custom", "directory": "skills/yoi-server"}
   ],
   "entities": [
     {

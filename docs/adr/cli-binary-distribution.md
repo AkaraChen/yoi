@@ -1,76 +1,92 @@
-# ADR: CLI 二进制分发（tag → Release 资产 + install.sh）
+# ADR: CLI 与探针二进制分发（tag → Release 资产 + raw install 脚本）
 
-- 状态：已被 docs/adr/pack-delivery-via-skill.md 取代（2026-08-27，pack
-  CLI 删除，pack 分发改为 yoi skill 内的 HTTP 配方）
-- 日期：2026-08-17
+- 状态：已接受
+- 日期：2026-08-27
+- 取代：2026-08-17 同名 ADR（该版只覆盖已删除的 pack-delivery `cmd/yoi`，
+  且已被 docs/adr/pack-delivery-via-skill.md 废止）
+- 不取代：docs/adr/pack-delivery-via-skill.md（pack 仍是 skill 内 HTTP，
+  本 ADR 只分发两个 ctxl CLI 与 Dashboard 探针）
 
 ## 背景与约束
 
-沙箱试验（hermes / openclaw / lobehub 三轮，`trials/`）一致表明：**Go 工具链是
-yoi CLI 分发的最大摩擦**——目标机器（干净 Linux 容器）没有 Go，agent 要先装
-工具链、配 GOPATH/GOBIN、处理权限与网络，才能跑 `go install`。约束：
+沙箱试验表明 Go 工具链是目标机上的最大摩擦。约束：
 
-- 目标机器是 POSIX 环境（Linux/macOS），多数没有 Go，但都有 curl 或 wget、tar。
 - 分发必须免认证：agent 在干净机器上没有 GitHub token。
-- **关键技术约束：GitHub Actions 的 workflow artifacts 无法免认证下载**——即使
-  公开仓库，直接 GET artifact URL 也返回 401（nightly.link 这类服务存在的原因
-  正在于此）。因此「装最新 CI 构建」不能走 artifacts，必须走 Release 资产：
-  `releases/latest/download/<asset>` 是无需 API 调用、无需认证、永远指向最新
-  Release 的重定向。
-- Release 资产名必须**不含版本号**，否则 `releases/latest/download/` 拼不出
-  固定 URL。
+- **GitHub Actions workflow artifacts 无法免认证下载**（公开仓库 GET 也
+  401）。install 脚本只能消费 Release 资产：
+  `releases/latest/download/<asset>`。
+- 资产名必须不含版本号，否则 latest URL 拼不出。
+- ctxl 生成目录在 regen 时整树替换。不要手改 `generated/*/main.go` 注入
+  版本——regen 会悄悄丢掉。版本写在 GitHub Release tag 上；探针
+  `main.go` 由本仓库维护，可以有 `var version`。
+- Windows 现纳入两个 CLI 的发布矩阵；探针对外承诺的是 Linux。
 
 ## 决策
 
-1. **Tag 触发构建**：`.github/workflows/release.yml` 在推送 `v*` tag 时运行。
-   先 `go test ./...`，再按矩阵（goos ∈ {linux, darwin} × goarch ∈ {amd64,
-   arm64}，共 4 个目标）交叉编译（`CGO_ENABLED=0`），经
-   `-ldflags "-X main.version=$TAG"` 注入版本（`cmd/yoi` 新增
-   `var version = "dev"`，经 cobra 的 `Version` 字段暴露为 `yoi --version`）。
-2. **Release 资产即分发产物**：每个目标打包为无版本号的
-   `yoi_<goos>_<goarch>.tar.gz`（含二进制，LICENSE/README 存在则一并打入），
-   另生成覆盖全部 tar 包的 `checksums.txt`（sha256），全部作为 GitHub Release
-   资产发布。
-3. **install.sh 一键安装**：仓库根目录的 POSIX sh 脚本，检测 OS/架构，从
-   `releases/latest/download/` 下载对应 tar 包与 checksums.txt，校验 sha256
-   （sha256sum 或 shasum），装到 `${YOI_INSTALL_DIR:-$HOME/.local/bin}`
-   （覆盖旧版即升级路径），无需 root。用法：
-   `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install.sh | sh`。
-4. **skill 引导顺序**：`skills/yoi/SKILL.md` 把 install.sh 列为装 CLI 的首选
-   （无需 Go），`go install` 降为兜底；「先问人、不静默安装」规则不变。
-5. **不支持 Windows**：install.sh 是 POSIX 脚本，发布矩阵不含 windows；Windows
-   用户走 `go install` 兜底。
+1. **Tag 触发构建**：`.github/workflows/release.yml` 在推送 `v*` tag
+   时运行（可选 `workflow_dispatch` 只跑测试与交叉编译，不发布）。
+   先 `go test` 仓库根上已有测试的包（`dashboard/server/live`、
+   `dashboard/server/store`），不要求不存在的 dashboard npm test。
+   `CGO_ENABLED=0` 交叉编译。
+2. **CLI 矩阵**：`generated/yoi` → `yoi`，`generated/yoi-server` →
+   `yoi-server`。goos ∈ {linux, darwin, windows} × goarch ∈ {amd64,
+   arm64}。Windows 资产为 `.zip`（内含 `.exe`），其余为 `.tar.gz`。
+3. **探针**：`dashboard/server` 发布名为 `yoi-dashboard`。CI 必须先
+   `dashboard/` 下 `npm ci && npm run build`，使 `go:embed all:dist`
+   能嵌进 `dashboard/server/dist`。至少 linux amd64 + linux arm64。
+   经 `-ldflags "-X main.version=$TAG"` 注入；`yoi-dashboard -version`
+   打印该值。darwin/windows 探针资产不做承诺。
+4. **资产命名**（无版本号）：
+   `yoi_<goos>_<goarch>.tar.gz` / `yoi_windows_<arch>.zip`，
+   `yoi-server_*` 与 `yoi-dashboard_*` 同构。另发 `checksums.txt`
+   （sha256，覆盖全部档案）。
+5. **install 脚本**在仓库根，经 raw.githubusercontent.com 获取：
+   `install-yoi.sh` / `install-yoi.ps1`、
+   `install-yoi-server.sh` / `install-yoi-server.ps1`。
+   探测 OS/架构，从 latest Release 下载、校验、装到
+   `${YOI_INSTALL_DIR:-$HOME/.local/bin}`（Unix，无需 root）或
+   `%LOCALAPPDATA%\yoi\bin`（Windows，需自行加入 PATH）。
+   覆盖即升级。可选的 `install-yoi-dashboard.sh` 仅 Linux，保持与
+   两条 CLI 安装器分离。
+6. **skill**：`skills/yoi/references/fleet.md` 给出 client 安装命令；
+   `skills/yoi-server/` 自定义 skill（登记在 `yoi-server.schema.json`）
+   给出 server CLI + 探针 + systemd 示例。安装前必须问人。
+7. **不走 workflow artifacts 当分发面**；job 之间传文件可以，对外 URL
+   必须是 Release。
 
 ## 备选方案
 
-- **workflow artifacts 直链**：无法免认证下载（公开仓库同样 401），install.sh
-  无法消费。否决——这是本 ADR 的核心约束。
-- **只保留 `go install`**：试验已证明它是最大摩擦点，目标机器普遍没有 Go。
-  否决，但保留为兜底路径。
-- **GoReleaser**：功能全但引入额外配置层；当前 4 个目标 + tar.gz + checksums
-  用原生 matrix + softprops/action-gh-release 足够。暂缓。
-- **Homebrew / 包管理器**：覆盖面和体验更好，但需要维护 tap 或进官方仓库，
-  发布流程更重。暂缓，Release 资产就绪后可叠加。
-- **nightly.link 代理 artifacts**：引入第三方可用性依赖，且 Release 方案已满足
-  需求。否决。
+- **workflow artifacts 直链**：无法免认证。否决。
+- **只保留从源码 `go build`**：目标机普遍没有 Go。否决；源码构建仍是
+  开发者路径（AGENTS.md）。
+- **GoReleaser / Homebrew**：额外配置层，暂缓。
+- **单一 `install.sh` 装所有二进制**：违背「两条 CLI 各一条 curl
+  路径」，且容易让人以为 pack CLI 还在。否决。
+- **在 generated main.go 里注入 version**：regen 丢改动。否决。
 
 ## 权衡与后果
 
-- 「最新版」语义 = 最新 Release，而非最新 commit：只有打了 `v*` tag 才有二进制。
-  第一个 tag 推送前 install.sh 必然失败——脚本对此给出明确报错并指向
-  `go install` 兜底。
-- 无版本号资产名使 `releases/latest/download/` 永久可用；代价是资产本身不携带
-  版本信息，版本靠二进制内注入的 `main.version`（`yoi --version`）查询。
-- 发布与 main 分支解耦：main 上的 install.sh 永远装最新 Release，不需要随
-  发布改动。
-- 失败边界：无 Release → 下载 404，脚本报错并提示兜底；checksum 缺失或不符 →
-  中止安装；不支持的 OS/架构 → 明确报错。脚本不产生半安装状态（先校验后落盘，
-  落盘用同目录 mv 覆盖）。
+- 「最新版」= GitHub 的 latest 正式 Release，不是最新 commit。
+  仓库已有 `v0.1.0`（旧 pack CLI）。缺资产或 404 时脚本必须说清楚并
+  退出，不落盘。
+- 资产本身不带版本号；探针可用 `-version` 读注入值；CLI 版本以
+  Release tag 为准。
+- main 上的 install 脚本永远指向 latest Release，发布时不必改脚本。
+- 本决策不把 pack 投递改回二进制。
+
+## 失败边界
+
+- 无 Release / 资产 404 → 非 0 退出，提示尚无发布。
+- checksum 缺失或不符 → 中止。
+- 不支持的 OS/架构 → 明确报错。
+- 先下载到临时目录并校验，再用同目录 `mv` 覆盖，避免半安装。
 
 ## 验证
 
-- `sh -n install.sh` 与 shellcheck 通过；`actionlint` 校验 workflow 通过。
-- `go build ./...`、`go test ./...` 通过；本地构建
-  `-ldflags "-X main.version=v0.0.0-test"` 后 `yoi --version` 输出注入值。
-- 首个 `v*` tag 推送后，人工确认 Release 资产齐全且
-  `curl -fsSL .../install.sh | sh` 在干净 Linux/macOS 机器上装出对应版本。
+- `sh -n install-yoi.sh`、`sh -n install-yoi-server.sh`（及可选的
+  dashboard 脚本）通过。
+- `go test ./dashboard/server/live ./dashboard/server/store` 通过。
+- 本机 `go build` 两个 generated CLI 与（先 vite build 后的）
+  `dashboard/server`。
+- 发布含现资产名的 `v*` 后，人工确认 Release 资产齐全且未认证
+  latest URL 可下载。

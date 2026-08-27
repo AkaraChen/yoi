@@ -65,15 +65,21 @@ Server CLI (ctxl-generated, schema `yoi-server.schema.json`):
 
 - Generate: `go run github.com/AkaraChen/ctxl/cmd/ctxl@latest generate yoi-server.schema.json`
 - Build: `cd generated/yoi-server && go build -o yoi-server .`
+- Install (ask first): `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.sh | sh`
+- Windows: `irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-server.ps1 | iex`
 
 Client CLI (ctxl-generated, schema `yoi.schema.json`):
 
 - Generate: `go run github.com/AkaraChen/ctxl/cmd/ctxl@latest generate yoi.schema.json`
 - Build: `cd generated/yoi && go build -o yoi .`
+- Install (ask first): `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.sh | sh`
+- Windows: `irm https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi.ps1 | iex`
+
+Linux probe from the same GitHub Release: `curl -fsSL https://raw.githubusercontent.com/AkaraChen/yoi/main/install-yoi-dashboard.sh | sh`. Push a `v*` tag to publish assets (see `.github/workflows/release.yml`). A latest URL 404s if that Release does not contain the named asset.
 
 Generation output lands in `generated/<name>` next to the schema and is replaced in place on regeneration. When a local ctxl checkout is available, `cd ../ctxl && go run ./cmd/ctxl generate ...` works too — the schema pins `generation.ctxl_version`, so no published ctxl release is required.
 
-Pack delivery has no binary: it is HTTP instructions inside the yoi skill (`skills/yoi/`), which is also bundled into the client CLI as a ctxl custom skill. Custom skills are bundled byte-for-byte at generation time — after editing anything under `skills/yoi/`, regenerate `generated/yoi` or the CLI serves a stale copy.
+Pack delivery has no binary: it is HTTP instructions inside the yoi skill (`skills/yoi/`), which is also bundled into the client CLI as a ctxl custom skill. Custom skills are bundled byte-for-byte at generation time — after editing anything under `skills/yoi/`, regenerate `generated/yoi` or the CLI serves a stale copy. After editing `skills/yoi-server/`, regenerate `generated/yoi-server`.
 
 Preview convention: run exactly one shared dev server in the terminal (currently http://localhost:3000). Subagents and multitask workers must not start their own dev/preview servers; verify against the shared one. While the dev server is running, do not run `npm run build` — the production build clobbers the dev server's `.next` directory and 500s every page. If a build check is needed, stop the dev server first and restart it after.
 

@@ -1,0 +1,130 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            generated/yoi/go.sum
+            generated/yoi-server/go.sum
+      - name: Test packages that have tests
+        run: go test ./dashboard/server/live ./dashboard/server/store
+
+  build-cli:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            generated/yoi/go.sum
+            generated/yoi-server/go.sum
+      - name: Build and package CLIs
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          set -eu
+          mkdir -p dist
+          ext=""
+          if [ "$GOOS" = windows ]; then ext=".exe"; fi
+          (cd generated/yoi && go build -trimpath -ldflags "-s -w" -o "../../dist/yoi${ext}" .)
+          (cd generated/yoi-server && go build -trimpath -ldflags "-s -w" -o "../../dist/yoi-server${ext}" .)
+          cd dist
+          if [ "$GOOS" = windows ]; then
+            zip "yoi_windows_${GOARCH}.zip" yoi.exe
+            zip "yoi-server_windows_${GOARCH}.zip" yoi-server.exe
+            rm -f yoi.exe yoi-server.exe
+          else
+            tar -czf "yoi_${GOOS}_${GOARCH}.tar.gz" yoi
+            tar -czf "yoi-server_${GOOS}_${GOARCH}.tar.gz" yoi-server
+            rm -f yoi yoi-server
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+          if-no-files-found: error
+
+  build-probe:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - name: Build embedded SPA
+        working-directory: dashboard
+        run: npm ci && npm run build
+      - name: Build and package probe
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+          VERSION: ${{ github.ref_name }}
+        run: |
+          set -eu
+          mkdir -p dist
+          go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o dist/yoi-dashboard ./dashboard/server
+          tar -C dist -czf "dist/yoi-dashboard_${GOOS}_${GOARCH}.tar.gz" yoi-dashboard
+          rm -f dist/yoi-dashboard
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    needs: [build-cli, build-probe]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums
+        working-directory: artifacts
+        run: |
+          set -eu
+          sha256sum *.tar.gz *.zip | sort -k2 > checksums.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true

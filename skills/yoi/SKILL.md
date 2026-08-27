@@ -17,7 +17,9 @@ This file is only a router — feature detail lives in `references/`.
   product for them.
 - Register or inspect managed servers, providers, or credential references on
   this dev machine → `references/fleet.md` (the `yoi` ctxl CLI; the store is
-  plain markdown under `~/.yoi/`).
+  plain markdown under `~/.yoi/`). Fleet writes need the `yoi` binary; if it
+  is missing, offer the install command in `fleet.md` and ask before
+  installing. Pack HTTP delivery does not need the CLI.
 
 When deploying on a server, deployment facts are recorded on that machine with
 the `yoi-server` CLI — run `yoi-server skills get` there for

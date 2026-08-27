@@ -2,7 +2,9 @@
 
 - 状态：已接受
 - 日期：2026-08-27
-- 取代：docs/adr/cli-binary-distribution.md
+- 取代：2026-08-17 版 docs/adr/cli-binary-distribution.md（仅覆盖已删除的
+  pack-delivery `cmd/yoi`）。2026-08-27 同名 ADR 已重新接受，只分发两个
+  ctxl CLI 与探针，不把 pack 投递改回二进制。
 
 ## 背景与约束
 
@@ -49,8 +51,9 @@ get/list/search 子命令承载，带来两个持续成本：
 - 没有任何 pack 二进制需要分发；agent 只需 curl。代价是下载算法
   （index.json 清单、路径校验、`.sh` 加执行位）以散文+配方形式维护在
   skill 里，没有编译期保障——pack-trial 流程是唯一回归网。
-- client/server 两个 ctxl CLI（`yoi`、`yoi-server`）自身的二进制分发
-  是未来工作，本 ADR 不覆盖。
+- client/server 两个 ctxl CLI 与探针的二进制分发见
+  docs/adr/cli-binary-distribution.md；本 ADR 只约束 pack 投递仍是
+  HTTP，不因 CLI Release 而改回 pack 二进制。
 - `cmd/yoi` 里随 pack CLI 一起删除的还有 deploy/log/skills 原型命令
   （DEPLOY.md 与 .yoi/deploy.log）；其支撑包 `internal/state`、
   `internal/audit`、`internal/skillsdata`（及 `embed.go` +

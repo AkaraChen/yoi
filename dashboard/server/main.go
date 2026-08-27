@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -30,6 +31,9 @@ import (
 
 //go:embed all:dist
 var distFS embed.FS
+
+// version is injected at release time via -ldflags "-X main.version=<tag>".
+var version = "dev"
 
 type serverInfo struct {
 	Hostname       string `json:"hostname"`
@@ -99,10 +103,15 @@ type server struct {
 }
 
 func main() {
+	showVersion := flag.Bool("version", false, "print version and exit")
 	addr := flag.String("addr", "127.0.0.1:8788", "listen address (localhost only by default)")
 	password := flag.String("password", envOr("YOI_DASHBOARD_PASSWORD", "yoi"), "panel password (env YOI_DASHBOARD_PASSWORD)")
 	storeRoot := flag.String("store", envOr("YOI_DASHBOARD_STORE", defaultStoreRoot()), "yoi-server fact store directory (env YOI_DASHBOARD_STORE)")
 	flag.Parse()
+	if *showVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	if !strings.HasPrefix(*addr, "127.0.0.1") && !strings.HasPrefix(*addr, "localhost") {
 		log.Printf("warning: listening on %s, the panel is meant to be localhost-only", *addr)

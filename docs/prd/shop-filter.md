@@ -3,7 +3,8 @@
 ## 问题与背景
 
 `/shop` 是全量 Pack 货架。访客若已有关键词（slug 或简介里的词），只能靠扫网格。
-CLI 已有 `yoi search`（slug / excerpt，大小写不敏感包含），网页没有对等入口。
+agent 侧已有 pack 搜索（yoi skill 的 HTTP 配方：slug / excerpt，大小写不敏感
+包含），网页没有对等入口。
 本功能撤回 `docs/prd/web-storefront.md` 初版「不做站内搜索/筛选」中针对
 `/shop` 货架的那一部分；不做全站搜索，也不做独立搜索页。
 
@@ -22,14 +23,14 @@ CLI 已有 `yoi search`（slug / excerpt，大小写不敏感包含），网页�
 
 - `/shop` 就地缩小货架，不离开当前页。
 - 当前查询可寻址：`/shop?q=…`；清空后回到干净的 `/shop`。
-- 匹配字段与 CLI `yoi search` 一致：slug、excerpt。
+- 匹配字段与 yoi skill 的 pack 搜索配方一致：slug、excerpt。
 
 ## 非目标
 
 - 不新增搜索页、搜索 API、或 `/packs.json?q=`。
 - 不搜 `page.mdx` 正文，不做分类/标签筛选，不做「你是不是想找」。
 - 不改首页预览、详情页、吸顶导航；过滤控件只出现在 `/shop`。
-- 不改 CLI `yoi search` 的契约或实现。
+- 不改 yoi skill 搜索配方（`skills/yoi/references/packs.md`）的契约。
 
 ## 范围与用户流
 
@@ -57,6 +58,6 @@ CLI 已有 `yoi search`（slug / excerpt，大小写不敏感包含），网页�
 
 ## 已解决的产品决策
 
-- 这是 **shop filter**（货架就地过滤），不是站点搜索，也不是 CLI search。
+- 这是 **shop filter**（货架就地过滤），不是站点搜索，也不是 agent 侧的 pack 搜索。
 - 查询进 URL（`q`）；空查询不保留无意义的 `?q=`。
 - 空结果老实说明没有匹配，不提供猜词或推荐。

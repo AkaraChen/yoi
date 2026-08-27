@@ -40,6 +40,7 @@
 
 ## 验证
 
-- 打开 `/shop?q=hermes` 水合后网格与 CLI `yoi search hermes` 命中同一批 slug。
+- 打开 `/shop?q=hermes` 水合后网格与 yoi skill 搜索配方（`GET /packs.json`
+  后按 slug/excerpt 子串过滤）命中同一批 slug。
 - 输入过程中浏览器历史只有一条 `/shop` 记录（replace，不是 push）。
 - `curl` `/packs.json` 仍返回全量、忽略任何 `q`。

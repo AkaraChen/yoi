@@ -1,0 +1,67 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AkaraChen/ctxl/main/core/schema/loader/ctxl.schema.json",
+  "name": "yoi-server",
+  "description": "Server-side deployment fact store: services, releases, and the append-only event stream of one machine.",
+  "store": {"name": "yoi"},
+  "generation": {
+    "mode": "standalone",
+    "module": "github.com/AkaraChen/yoi/generated/yoi-server",
+    "ctxl_version": "v0.0.0-20260827070639-933b52740aab"
+  },
+  "skills": [
+    {
+      "type": "builtin",
+      "name": "yoi-server-store",
+      "description": "Manage on-server deployment facts (services, releases, events) through the yoi-server context CLI.",
+      "allowed-tools": "Bash(yoi-server:*)"
+    }
+  ],
+  "entities": [
+    {
+      "name": "service",
+      "kind": "plural",
+      "format": "markdown",
+      "path": "services",
+      "scope": "global",
+      "fields": [
+        {"name": "display_name", "type": "string", "required": true, "description": "Human-facing service name"},
+        {"name": "pack_ref", "type": "string", "description": "Pack slug this service was deployed from, if any"},
+        {"name": "desired_state", "type": "string", "required": true, "description": "running | stopped | removed"},
+        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"}
+      ],
+      "description": "Logical service identity; the spec template (ports/env/resources/health_check) lives in the body as a JSON fenced block."
+    },
+    {
+      "name": "release",
+      "kind": "plural",
+      "format": "markdown",
+      "path": "releases",
+      "scope": "global",
+      "fields": [
+        {"name": "service", "type": "string", "required": true, "description": "Service id this release deploys"},
+        {"name": "seq", "type": "string", "description": "Human-facing per-service sequence number"},
+        {"name": "status", "type": "string", "required": true, "description": "pending | active | failed | superseded"},
+        {"name": "image", "type": "string", "description": "Deployed image reference"},
+        {"name": "created_by", "type": "string", "required": true, "description": "Agent self-reported name"},
+        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"}
+      ],
+      "description": "Immutable deployment intent; only status changes after creation. Create with a uuid --id. Body holds ## Plan / ## Config / ## Outcome sections with JSON fenced blocks."
+    },
+    {
+      "name": "event",
+      "kind": "plural",
+      "format": "ndjson",
+      "path": "events.ndjson",
+      "scope": "global",
+      "fields": [
+        {"name": "service", "type": "string", "required": true, "description": "Service id the event belongs to"},
+        {"name": "release", "type": "string", "description": "Optional release uuid this event belongs to"},
+        {"name": "actor", "type": "string", "required": true, "description": "Agent self-reported name"},
+        {"name": "kind", "type": "string", "required": true, "description": "Open set, e.g. deploy_started | config_change | oom_killed | custom"},
+        {"name": "summary", "type": "string", "required": true, "description": "Agent-written human-readable one-liner"},
+        {"name": "data", "type": "object", "description": "Free-form JSON payload"}
+      ],
+      "description": "Append-only fact stream; non-deployment events stay independent from releases."
+    }
+  ]
+}

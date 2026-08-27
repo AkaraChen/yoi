@@ -5,3 +5,8 @@ node_modules/
 .next/
 out/
 trials/
+
+# Build artifacts
+/server
+generated/yoi/yoi
+generated/yoi-server/yoi-server

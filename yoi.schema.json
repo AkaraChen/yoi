@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AkaraChen/ctxl/main/core/schema/loader/ctxl.schema.json",
+  "name": "yoi",
+  "description": "Client-side fleet inventory: servers, providers, and credential references for the machines your agent manages.",
+  "generation": {
+    "mode": "standalone",
+    "module": "github.com/AkaraChen/yoi/generated/yoi",
+    "ctxl_version": "v0.0.0-20260827070639-933b52740aab"
+  },
+  "skills": [
+    {
+      "type": "builtin",
+      "name": "yoi-fleet",
+      "description": "Manage the client-side server fleet inventory (servers, providers, credential references) through the yoi context CLI.",
+      "allowed-tools": "Bash(yoi:*)"
+    },
+    {"type": "custom", "directory": "skills/yoi"}
+  ],
+  "entities": [
+    {
+      "name": "server",
+      "kind": "plural",
+      "format": "markdown",
+      "path": "servers",
+      "scope": "global",
+      "fields": [
+        {"name": "host", "type": "string", "required": true, "description": "Hostname or IP"},
+        {"name": "ssh_port", "type": "string", "description": "SSH port (default 22)"},
+        {"name": "user", "type": "string", "description": "SSH user"},
+        {"name": "dashboard_url", "type": "string", "description": "Dashboard URL, e.g. http://127.0.0.1:8788 via SSH tunnel"},
+        {"name": "provider", "type": "string", "description": "Provider entity id, if cloud-managed"},
+        {"name": "terraform", "type": "string", "description": "Terraform workspace/config reference, if terraform-managed"},
+        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"}
+      ],
+      "description": "One managed server. Body holds notes: tunnel command, key hints, etc."
+    },
+    {
+      "name": "provider",
+      "kind": "plural",
+      "format": "markdown",
+      "path": "providers",
+      "scope": "global",
+      "fields": [
+        {"name": "kind", "type": "string", "required": true, "description": "aws | cloudflare | vercel | vultr | ..."},
+        {"name": "account", "type": "string", "description": "Account id or email"},
+        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"}
+      ],
+      "description": "Cloud/SaaS provider account. Body holds notes."
+    },
+    {
+      "name": "credential",
+      "kind": "plural",
+      "format": "markdown",
+      "path": "credentials",
+      "scope": "global",
+      "fields": [
+        {"name": "kind", "type": "string", "required": true, "description": "api_token | ssh_key | password | ..."},
+        {"name": "ref", "type": "string", "required": true, "description": "Where the secret lives: env var name, file path, 1Password reference"},
+        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"}
+      ],
+      "description": "A credential reference. NEVER store the secret itself here — only a reference (env var name, file path, 1Password item) to where the secret lives. Body holds notes."
+    }
+  ]
+}

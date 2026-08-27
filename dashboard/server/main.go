@@ -18,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/AkaraChen/yoi/dashboard/server/live"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/host"
@@ -84,6 +85,9 @@ type historyPoint struct {
 type server struct {
 	password  string
 	storeRoot string
+	host      live.Host
+	hub       *hub
+	live      liveCache
 
 	mu       sync.Mutex
 	sessions map[string]bool
@@ -104,9 +108,16 @@ func main() {
 		log.Printf("warning: listening on %s, the panel is meant to be localhost-only", *addr)
 	}
 
-	s := &server{password: *password, storeRoot: *storeRoot, sessions: map[string]bool{}}
+	s := &server{
+		password:  *password,
+		storeRoot: *storeRoot,
+		host:      live.NewHost(),
+		hub:       newHub(),
+		sessions:  map[string]bool{},
+	}
 	s.collect() // one synchronous sample so the API never serves zeros at boot
 	go s.runSampler()
+	s.watchStore()
 
 	static, err := fs.Sub(distFS, "dist")
 	if err != nil {
@@ -120,7 +131,10 @@ func main() {
 	mux.HandleFunc("GET /api/server/metrics", s.withAuth(s.handleServerMetrics))
 	mux.HandleFunc("GET /api/server/history", s.withAuth(s.handleServerHistory))
 	mux.HandleFunc("GET /api/services", s.withAuth(s.handleServices))
+	mux.HandleFunc("GET /api/services/live", s.withAuth(s.handleServicesLive))
 	mux.HandleFunc("GET /api/services/{id}", s.withAuth(s.handleService))
+	mux.HandleFunc("GET /api/services/{id}/live", s.withAuth(s.handleServiceLive))
+	mux.HandleFunc("GET /api/ws", s.withAuth(s.handleWS))
 	mux.Handle("/", spaHandler(static))
 
 	log.Printf("yoi dashboard listening on http://%s (store %s)", *addr, *storeRoot)

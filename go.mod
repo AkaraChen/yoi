@@ -2,7 +2,12 @@ module github.com/AkaraChen/yoi
 
 go 1.24.0
 
-require github.com/shirou/gopsutil/v4 v4.26.7
+require (
+	github.com/fsnotify/fsnotify v1.10.1
+	github.com/gorilla/websocket v1.5.3
+	github.com/shirou/gopsutil/v4 v4.26.7
+	gopkg.in/yaml.v3 v3.0.1
+)
 
 require (
 	github.com/ebitengine/purego v0.10.2 // indirect

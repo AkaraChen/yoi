@@ -57,6 +57,7 @@ created_at: 2026-08-27T12:00:00Z
 `+"```json"+`
 {"goal": "v2"}
 `+"```"+`
+)
 
 ## Outcome
 
@@ -105,11 +106,70 @@ func TestReadServices(t *testing.T) {
 	if svcs[0].DisplayName != "LobeHub" || svcs[0].DesiredState != "running" {
 		t.Fatalf("bad fields: %+v", svcs[0])
 	}
-	if svcs[0].Spec["resources"].(map[string]any)["memory"] != "1G" {
-		t.Fatalf("bad spec: %v", svcs[0].Spec)
+	if svcs[0].Ports != "3210" || svcs[0].Memory != "1G" {
+		t.Fatalf("spec fallback: ports=%q memory=%q", svcs[0].Ports, svcs[0].Memory)
 	}
-	if len(svcs[0].Links) != 1 || svcs[0].Links[0].URL != "https://example.com" {
+	if len(svcs[0].Links) != 1 || svcs[0].Links[0].Link != "https://example.com" || svcs[0].Links[0].Name != "官网" {
 		t.Fatalf("bad links: %+v", svcs[0].Links)
+	}
+}
+
+func TestReadYAMLFrontmatter(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "services/web.md", `---
+display_name: Web
+desired_state: running
+ports: 3210 8080
+memory: 1G
+cpu: "1"
+runtime:
+  kind: compose
+  file: /opt/app/docker-compose.yml
+  services:
+    - web
+    - db
+links:
+  - id: site
+    name: 官网
+    link: https://example.com
+---
+`)
+	svc, err := ReadService(root, "web")
+	if err != nil || svc == nil {
+		t.Fatalf("read: %v %v", svc, err)
+	}
+	if svc.Ports != "3210 8080" || svc.Memory != "1G" || svc.Cpu != "1" {
+		t.Fatalf("scalars: %+v", svc)
+	}
+	if !svc.Runtime.Present() || svc.Runtime.Kind != "compose" || svc.Runtime.File != "/opt/app/docker-compose.yml" {
+		t.Fatalf("runtime: %+v", svc.Runtime)
+	}
+	if len(svc.Runtime.Services) != 2 || svc.Runtime.Services[0] != "web" {
+		t.Fatalf("services: %v", svc.Runtime.Services)
+	}
+	if len(svc.Links) != 1 || svc.Links[0].ID != "site" || svc.Links[0].Link != "https://example.com" {
+		t.Fatalf("links: %+v", svc.Links)
+	}
+}
+
+func TestReadJSONStringObjects(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "services/cli.md", `---
+display_name: CLI
+desired_state: running
+runtime: {"kind":"docker","containers":["web"]}
+links: '[{"id":"docs","name":"文档","link":"https://docs.example"}]'
+---
+`)
+	svc, err := ReadService(root, "cli")
+	if err != nil || svc == nil {
+		t.Fatalf("read: %v %v", svc, err)
+	}
+	if svc.Runtime == nil || svc.Runtime.Kind != "docker" || len(svc.Runtime.Containers) != 1 {
+		t.Fatalf("runtime: %+v", svc.Runtime)
+	}
+	if len(svc.Links) != 1 || svc.Links[0].Name != "文档" {
+		t.Fatalf("links: %+v", svc.Links)
 	}
 }
 
@@ -154,7 +214,7 @@ func TestReadEventsSortedFilteredTolerant(t *testing.T) {
 		t.Fatalf("want 2 events for lobehub, got %d", len(events))
 	}
 	if events[0].ID != 2 || events[1].ID != 1 {
-		t.Fatalf("events not newest-first: %v", []int64{events[0].ID, events[1].ID})
+		t.Fatalf("events not newest-first: %v", []int{events[0].ID, events[1].ID})
 	}
 	if events[0].Data["duration_sec"] != float64(45) || events[0].Release != "bbbb-newer" {
 		t.Fatalf("bad event payload: %+v", events[0])

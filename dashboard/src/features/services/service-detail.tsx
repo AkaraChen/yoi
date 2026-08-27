@@ -2,21 +2,26 @@ import type { FC } from "react";
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getService } from "@/lib/api";
+import { getService, getServiceLive } from "@/lib/api";
 import { formatRelative } from "@/lib/format";
 import { PageHeader } from "@/components/page-header";
 import { StatusDot } from "@/components/status-dot";
 import { statusLabel } from "@/lib/status";
 import { EventLog } from "@/features/services/event-log";
 import { ReleaseList } from "@/features/services/release-list";
-import { SpecCard } from "@/features/services/spec-card";
+import { LiveCard } from "@/features/services/live-card";
 import { ServiceRail } from "@/features/services/service-rail";
 
 export const ServiceDetail: FC = () => {
   const { serviceId = "" } = useParams();
   const service = useQuery({
-    queryKey: ["services", serviceId],
+    queryKey: ["service", serviceId],
     queryFn: () => getService(serviceId),
+  });
+  const live = useQuery({
+    queryKey: ["service-live", serviceId],
+    queryFn: () => getServiceLive(serviceId),
+    refetchInterval: 30_000,
   });
 
   if (service.data === null) {
@@ -31,28 +36,29 @@ export const ServiceDetail: FC = () => {
   }
 
   const s = service.data;
+  const status = live.data?.status;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       {s ? (
         <>
           <PageHeader
-            leading={<StatusDot status={s.status} className="size-2.5" />}
+            leading={status ? <StatusDot status={status} className="size-2.5" /> : <Skeleton className="size-2.5 rounded-full" />}
             title={s.name}
             description={
               <>
-                {statusLabel[s.status]}
+                {status ? statusLabel[status] : "读取中"}
                 {s.createdAt && <> · 创建于 {formatRelative(s.createdAt)}</>}
               </>
             }
           />
           <div className="grid items-start gap-4 lg:grid-cols-[1fr_260px]">
             <div className="flex min-w-0 flex-col gap-4">
-              <SpecCard spec={s.spec} />
+              <LiveCard service={s} live={live.data ?? undefined} />
               <ReleaseList releases={s.releases} />
               <EventLog events={s.events} />
             </div>
-            <ServiceRail service={s} />
+            <ServiceRail service={s} status={status} />
           </div>
         </>
       ) : (

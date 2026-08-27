@@ -17,6 +17,10 @@ yoi 的产品 surface 分为三个世界，各自独立演化，通过约定好�
 - Web 世界只读 `packs/`，不直接触碰 Server 或 Client 的存储。
 - 用户的 Agent 是 Client 与 Server 之间的桥梁：在 Client 上运行，通过 SSH/API 连接 Server 的 Dashboard 或 CLI。
 
+## Store documents
+
+`~/.yoi/` 里的 markdown **配置必须形式化，写在 frontmatter**（ctxl 声明过的字段，含对象/数组）。body 只放给人读的叙述或按章节约束的内容（例如 Release 的 Plan / Config / Outcome）。不要用 `## Spec` 自由 JSON 块承载配置。Service 的 `runtime`、`links`、`ports` 等见 `docs/adr/service-runtime-binding.md`。
+
 ## Feature development
 
 For every new feature, use `$feature-dev` before implementation. Inspect the code and all project documentation, complete the one-question-at-a-time product and technical 质问, and record the agreed product requirements, architecture decisions, and general specification under `docs/` before changing feature code.
@@ -55,6 +59,7 @@ Dashboard (`dashboard/`, Vite + React SPA + Go probe):
 - Dev: `cd dashboard && npm run dev` (Vite on 5173, proxies `/api` to Go probe on 8788)
 - Build: `cd dashboard && npm run build`
 - Go probe: `cd dashboard/server && go build` (embeds SPA, serves on 127.0.0.1:8788)
+- Store types: `go generate ./dashboard/server/store` (from `dashboard/server/store/schema.json`)
 
 Server CLI (ctxl-generated, schema `yoi-server.schema.json`):
 

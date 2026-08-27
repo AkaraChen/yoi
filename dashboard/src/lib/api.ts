@@ -1,7 +1,7 @@
 /**
  * Data boundary for the dashboard. Server info/metrics, auth, and services
- * are all served by the Go probe (dashboard/server); services read the
- * yoi-server fact store (~/.yoi) via GET /api/services[/<id>].
+ * are all served by the Go probe (dashboard/server); documents come from
+ * GET /api/services[/<id>], occupancy from GET /api/services[/id]/live.
  */
 
 export const SESSION_KEY = "yoi-dashboard-authed";
@@ -25,13 +25,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     throw new ApiError(res.status, `request failed: ${res.status}`);
   }
+  if (res.status === 204) {
+    return undefined as T;
+  }
   return res.json() as Promise<T>;
 }
 
-// Only "running" and "stopped" occur today: the status is the service's
-// desired_state (intent), and "removed" services are filtered out by the
-// probe. "degraded" stays in the type for when live state lands.
-export type ServiceStatus = "running" | "degraded" | "stopped";
+export type ServiceStatus = "running" | "degraded" | "stopped" | "unknown";
 
 export interface ServerInfo {
   hostname: string;
@@ -68,24 +68,26 @@ export interface ServerMetrics {
 export interface ServiceSummary {
   id: string;
   name: string;
-  status: ServiceStatus;
+  desiredState: string;
 }
 
 export interface ServiceLink {
-  kind: string;
-  label: string;
-  url: string;
+  id: string;
+  name: string;
+  link: string;
 }
 
-/** The service spec is agent-written free-form JSON; known keys are typed,
- *  anything else passes through. */
-export interface ServiceSpec {
-  ports?: number[];
-  env?: Record<string, string>;
-  resources?: Record<string, string>;
-  health_check?: { endpoint?: string; expect?: number };
-  links?: ServiceLink[];
-  [key: string]: unknown;
+export interface ServiceRuntime {
+  kind: string;
+  file?: string;
+  project?: string;
+  services?: string[];
+  containers?: string[];
+  units?: string[];
+  names?: string[];
+  files?: string[];
+  sockets?: string[];
+  command?: string;
 }
 
 export interface Release {
@@ -111,13 +113,36 @@ export interface ServiceEvent {
   data?: Record<string, unknown>;
 }
 
-export interface Service extends ServiceSummary {
+export interface Service {
+  id: string;
+  name: string;
+  desiredState: string;
   packRef: string;
   createdAt: string;
-  spec: ServiceSpec;
+  ports: string;
+  cpu: string;
+  memory: string;
+  runtime: ServiceRuntime | null;
   links: ServiceLink[];
   releases: Release[];
   events: ServiceEvent[];
+}
+
+export interface LiveRow {
+  name: string;
+  status: string;
+  cpuPercent?: number;
+  memBytes?: number;
+  pid?: number;
+  raw?: Record<string, unknown>;
+}
+
+export interface ServiceLive {
+  id: string;
+  status: ServiceStatus;
+  undetectable: boolean;
+  error?: string;
+  rows: LiveRow[];
 }
 
 export async function login(password: string): Promise<boolean> {
@@ -159,9 +184,24 @@ export async function getServices(): Promise<ServiceSummary[]> {
   return apiFetch<ServiceSummary[]>("/api/services");
 }
 
+export async function getServicesLive(): Promise<ServiceLive[]> {
+  return apiFetch<ServiceLive[]>("/api/services/live");
+}
+
 export async function getService(id: string): Promise<Service | null> {
   try {
     return await apiFetch<Service>(`/api/services/${encodeURIComponent(id)}`);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+export async function getServiceLive(id: string): Promise<ServiceLive | null> {
+  try {
+    return await apiFetch<ServiceLive>(`/api/services/${encodeURIComponent(id)}/live`);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       return null;

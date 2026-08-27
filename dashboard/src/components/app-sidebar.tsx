@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusDot } from "@/components/status-dot";
-import { getServerMetrics, getServices } from "@/lib/api";
+import { getServerMetrics, getServices, getServicesLive } from "@/lib/api";
 import { formatPercent } from "@/lib/format";
 
 export const AppSidebar: FC = () => {
@@ -27,6 +27,12 @@ export const AppSidebar: FC = () => {
     refetchInterval: 3_000,
   });
   const services = useQuery({ queryKey: ["services"], queryFn: getServices });
+  const live = useQuery({
+    queryKey: ["services-live"],
+    queryFn: getServicesLive,
+    refetchInterval: 30_000,
+  });
+  const liveById = new Map((live.data ?? []).map((row) => [row.id, row]));
 
   return (
     <Sidebar>
@@ -74,7 +80,11 @@ export const AppSidebar: FC = () => {
                         isActive={location.pathname === `/services/${service.id}`}
                       >
                         <NavLink to={`/services/${service.id}`}>
-                          <StatusDot status={service.status} />
+                          {live.isPending ? (
+                            <Skeleton className="size-2 rounded-full" />
+                          ) : (
+                            <StatusDot status={liveById.get(service.id)?.status ?? "unknown"} />
+                          )}
                           <span>{service.name}</span>
                         </NavLink>
                       </SidebarMenuButton>

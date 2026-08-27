@@ -27,9 +27,14 @@
         {"name": "display_name", "type": "string", "required": true, "description": "Human-facing service name"},
         {"name": "pack_ref", "type": "string", "description": "Pack slug this service was deployed from, if any"},
         {"name": "desired_state", "type": "string", "required": true, "description": "running | stopped | removed"},
-        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"}
+        {"name": "created_at", "type": "string", "description": "RFC3339 creation timestamp"},
+        {"name": "ports", "type": "string", "description": "Declared listen ports, space or comma separated"},
+        {"name": "cpu", "type": "string", "description": "Declared CPU limit (human-facing, not live)"},
+        {"name": "memory", "type": "string", "description": "Declared memory limit (human-facing, not live)"},
+        {"name": "links", "type": "object", "description": "JSON array of {id, name, link}"},
+        {"name": "runtime", "type": "object", "description": "Supervisor binding JSON: {kind, ...}. kind is compose|docker|podman|systemd|pm2|pidfile|socket|custom. compose needs file (+ optional project, services). docker/podman: containers. systemd: units. pm2: names. pidfile: files. socket: sockets. custom: command."}
       ],
-      "description": "Logical service identity; the spec template (ports/env/resources/health_check) lives in the body as a JSON fenced block."
+      "description": "Logical service identity. Configuration lives in frontmatter (runtime, links, ports, cpu, memory). Body is unused."
     },
     {
       "name": "release",

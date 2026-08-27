@@ -1,23 +1,22 @@
 import type { FC } from "react";
-import { BookOpen, ChartColumn, ExternalLink, FolderGit2, Globe } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusDot } from "@/components/status-dot";
 import { statusLabel } from "@/lib/status";
-import type { Service } from "@/lib/api";
+import type { Service, ServiceStatus } from "@/lib/api";
 import { formatRelative } from "@/lib/format";
-
-const linkIcon: Record<string, typeof Globe> = {
-  website: Globe,
-  docs: BookOpen,
-  github: FolderGit2,
-  grafana: ChartColumn,
-};
 
 type ServiceRailProps = {
   service: Service;
+  status?: ServiceStatus;
 };
 
-export const ServiceRail: FC<ServiceRailProps> = ({ service }) => {
+const desiredLabel: Record<string, string> = {
+  running: "运行",
+  stopped: "停止",
+};
+
+export const ServiceRail: FC<ServiceRailProps> = ({ service, status }) => {
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -26,12 +25,24 @@ export const ServiceRail: FC<ServiceRailProps> = ({ service }) => {
         </CardHeader>
         <CardContent className="flex flex-col gap-2 p-4 pt-0 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">期望状态</span>
+            <span className="text-muted-foreground">当前</span>
             <span className="inline-flex items-center gap-1.5">
-              <StatusDot status={service.status} />
-              {statusLabel[service.status]}
+              {status ? (
+                <>
+                  <StatusDot status={status} />
+                  {statusLabel[status]}
+                </>
+              ) : (
+                "读取中"
+              )}
             </span>
           </div>
+          {service.desiredState && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">期望</span>
+              <span>{desiredLabel[service.desiredState] ?? service.desiredState}</span>
+            </div>
+          )}
           {service.packRef && (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Pack</span>
@@ -59,22 +70,19 @@ export const ServiceRail: FC<ServiceRailProps> = ({ service }) => {
             <CardTitle className="text-sm font-normal text-muted-foreground">外部链接</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col p-2">
-            {service.links.map((link) => {
-              const Icon = linkIcon[link.kind] ?? ExternalLink;
-              return (
-                <a
-                  key={link.url}
-                  href={link.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-secondary"
-                >
-                  <Icon className="size-4 text-muted-foreground" />
-                  {link.label}
-                  <ExternalLink className="ml-auto size-3.5 text-muted-foreground/60" />
-                </a>
-              );
-            })}
+            {service.links.map((link) => (
+              <a
+                key={link.id || link.link}
+                href={link.link}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-secondary"
+              >
+                <ExternalLink className="size-4 text-muted-foreground" />
+                {link.name || link.link}
+                <ExternalLink className="ml-auto size-3.5 text-muted-foreground/60" />
+              </a>
+            ))}
           </CardContent>
         </Card>
       )}

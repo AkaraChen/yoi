@@ -19,7 +19,9 @@ Agent 需要跨会话记忆：上次部署了什么、为什么失败、配置�
 
 ### 1. 三实体分离
 
-- **Service**：逻辑身份，几乎不变。`spec` 是模板，不是某次部署的快照。
+- **Service**：逻辑身份，几乎不变。运行时绑定、端口、限制、链接都在
+  frontmatter（见 `docs/adr/service-runtime-binding.md`）。不再用 body
+  里的 `## Spec` JSON 当配置。
 - **Release**：一次部署意图，不可变。`config` 是完整快照，`plan` 是
   Agent 自述，`outcome` 是执行结果。创建后只能改 `status`。
 - **Event**：独立的事实记录，append-only。`release` 可空，非部署
@@ -54,15 +56,14 @@ NDJSON 字段里，不用文件系统嵌套表达（ctxl 的设计哲学）：
 
 ```
 ~/.yoi/
-  services/<service-id>.md   # Service：frontmatter 扁平字段，body 存 spec JSON 块
+  services/<service-id>.md   # Service：配置全在 frontmatter（含 runtime / links）
   releases/<uuid>.md         # Release：frontmatter 扁平字段，body 存 ## Plan / ## Config / ## Outcome
   events.ndjson              # Event：一行一个 JSON 对象，id/ts 由 CLI 自动补上
 ```
 
-Frontmatter 只存扁平字符串字段；结构化 JSON 负载放在 markdown body
-的 fenced code block（Service spec、Release 的 plan/config/outcome）
-或 NDJSON 的 object 字段（Event 的 `data`）里。人类可直接阅读，
-Agent 可解析 frontmatter、code block 和 NDJSON 行。
+Service 配置（含对象/数组）写在 YAML frontmatter。Release 的结构化
+负载仍在 body 的 fenced JSON（Plan / Config / Outcome）；Event 的
+`data` 在 NDJSON 的 object 字段。人类可直接阅读，Agent 可解析。
 
 ### 6. 无状态机，权限即事实
 

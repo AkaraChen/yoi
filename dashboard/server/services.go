@@ -2,7 +2,10 @@ package main
 
 import (
 	"net/http"
+	"sync"
+	"time"
 
+	"github.com/AkaraChen/yoi/dashboard/server/live"
 	"github.com/AkaraChen/yoi/dashboard/server/store"
 )
 
@@ -10,9 +13,9 @@ import (
 // convention (see docs/adr/dashboard-probe-server.md).
 
 type serviceSummaryJSON struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Status string `json:"status"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	DesiredState string `json:"desiredState"`
 }
 
 type releaseJSON struct {
@@ -28,15 +31,26 @@ type releaseJSON struct {
 }
 
 type serviceJSON struct {
-	ID        string         `json:"id"`
-	Name      string         `json:"name"`
-	Status    string         `json:"status"`
-	PackRef   string         `json:"packRef"`
-	CreatedAt string         `json:"createdAt"`
-	Spec      map[string]any `json:"spec"`
-	Links     []store.Link   `json:"links"`
-	Releases  []releaseJSON  `json:"releases"`
-	Events    []store.Event  `json:"events"`
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	DesiredState string         `json:"desiredState"`
+	PackRef      string         `json:"packRef"`
+	CreatedAt    string         `json:"createdAt"`
+	Ports        string         `json:"ports"`
+	CPU          string         `json:"cpu"`
+	Memory       string         `json:"memory"`
+	Runtime      *store.Runtime `json:"runtime"`
+	Links        []store.Link   `json:"links"`
+	Releases     []releaseJSON  `json:"releases"`
+	Events       []store.Event  `json:"events"`
+}
+
+const liveCacheTTL = 2 * time.Second
+
+type liveCache struct {
+	mu    sync.Mutex
+	at    time.Time
+	snaps []live.Snapshot
 }
 
 func (s *server) handleServices(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +64,7 @@ func (s *server) handleServices(w http.ResponseWriter, r *http.Request) {
 		if svc.DesiredState == "removed" {
 			continue
 		}
-		out = append(out, serviceSummaryJSON{ID: svc.ID, Name: svc.DisplayName, Status: svc.DesiredState})
+		out = append(out, serviceSummaryJSON{ID: svc.ID, Name: svc.DisplayName, DesiredState: svc.DesiredState})
 	}
 	writeJSON(w, out)
 }
@@ -77,23 +91,24 @@ func (s *server) handleService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out := serviceJSON{
-		ID:        svc.ID,
-		Name:      svc.DisplayName,
-		Status:    svc.DesiredState,
-		PackRef:   svc.PackRef,
-		CreatedAt: svc.CreatedAt,
-		Spec:      svc.Spec,
-		Links:     svc.Links,
-		Releases:  make([]releaseJSON, 0, len(releases)),
-		Events:    events,
-	}
-	// Keep the JSON shape stable for the SPA: absent spec/links are {} / [],
-	// never null.
-	if out.Spec == nil {
-		out.Spec = map[string]any{}
+		ID:           svc.ID,
+		Name:         svc.DisplayName,
+		DesiredState: svc.DesiredState,
+		PackRef:      svc.PackRef,
+		CreatedAt:    svc.CreatedAt,
+		Ports:        svc.Ports,
+		CPU:          svc.Cpu,
+		Memory:       svc.Memory,
+		Runtime:      svc.Runtime,
+		Links:        svc.Links,
+		Releases:     make([]releaseJSON, 0, len(releases)),
+		Events:       events,
 	}
 	if out.Links == nil {
 		out.Links = []store.Link{}
+	}
+	if out.Events == nil {
+		out.Events = []store.Event{}
 	}
 	for _, rel := range releases {
 		out.Releases = append(out.Releases, releaseJSON{
@@ -109,4 +124,54 @@ func (s *server) handleService(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	writeJSON(w, out)
+}
+
+func (s *server) handleServicesLive(w http.ResponseWriter, r *http.Request) {
+	snaps, err := s.liveAll(r)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, snaps)
+}
+
+func (s *server) handleServiceLive(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	svc, err := store.ReadService(s.storeRoot, id)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if svc == nil || svc.DesiredState == "removed" {
+		writeError(w, http.StatusNotFound, "service not found")
+		return
+	}
+	writeJSON(w, live.Probe(r.Context(), s.host, *svc))
+}
+
+func (s *server) liveAll(r *http.Request) ([]live.Snapshot, error) {
+	s.live.mu.Lock()
+	if time.Since(s.live.at) < liveCacheTTL && s.live.snaps != nil {
+		out := s.live.snaps
+		s.live.mu.Unlock()
+		return out, nil
+	}
+	s.live.mu.Unlock()
+
+	services, err := store.ReadServices(s.storeRoot)
+	if err != nil {
+		return nil, err
+	}
+	active := make([]store.Service, 0, len(services))
+	for _, svc := range services {
+		if svc.DesiredState != "removed" {
+			active = append(active, svc)
+		}
+	}
+	snaps := live.ProbeAll(r.Context(), s.host, active)
+	s.live.mu.Lock()
+	s.live.at = time.Now()
+	s.live.snaps = snaps
+	s.live.mu.Unlock()
+	return snaps, nil
 }

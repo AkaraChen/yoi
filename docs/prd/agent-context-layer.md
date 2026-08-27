@@ -72,19 +72,19 @@ display_name: LobeHub
 pack_ref: lobehub
 created_at: 2026-08-20T10:00:00Z
 desired_state: running
+ports: 3210
+memory: 1G
+runtime:
+  kind: compose
+  file: /opt/lobehub/docker-compose.yml
+links:
+  - id: web
+    name: 官网
+    link: https://example.com
 ---
-
-## Spec
-
-```json
-{
-  "ports": [3210],
-  "env": {"DATABASE_URL": "..."},
-  "resources": {"memory": "1G"},
-  "health_check": {"endpoint": "/health", "expect": 200}
-}
 ```
-```
+
+配置只在 frontmatter。body 不再放 `## Spec` JSON。
 
 ### Release
 

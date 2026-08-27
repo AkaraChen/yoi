@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yoi.dev/schemas/store-frontmatter.json",
+  "title": "Documents",
+  "type": "object",
+  "properties": {
+    "service": { "$ref": "#/$defs/ServiceFrontmatter" },
+    "release": { "$ref": "#/$defs/ReleaseFrontmatter" },
+    "event": { "$ref": "#/$defs/Event" },
+    "spec": { "$ref": "#/$defs/SpecFallback" }
+  },
+  "$defs": {
+    "Runtime": {
+      "type": "object",
+      "required": ["kind", "file", "project", "services", "containers", "units", "names", "files", "sockets", "command"],
+      "properties": {
+        "kind": { "type": "string" },
+        "file": { "type": "string" },
+        "project": { "type": "string" },
+        "services": { "type": "array", "items": { "type": "string" } },
+        "containers": { "type": "array", "items": { "type": "string" } },
+        "units": { "type": "array", "items": { "type": "string" } },
+        "names": { "type": "array", "items": { "type": "string" } },
+        "files": { "type": "array", "items": { "type": "string" } },
+        "sockets": { "type": "array", "items": { "type": "string" } },
+        "command": { "type": "string" }
+      }
+    },
+    "Link": {
+      "type": "object",
+      "required": ["id", "name", "link", "kind", "label", "url"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "link": { "type": "string" },
+        "kind": { "type": "string" },
+        "label": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    },
+    "ServiceFrontmatter": {
+      "type": "object",
+      "required": ["display_name", "pack_ref", "desired_state", "created_at", "ports", "cpu", "memory", "links"],
+      "properties": {
+        "display_name": { "type": "string" },
+        "pack_ref": { "type": "string" },
+        "desired_state": { "type": "string" },
+        "created_at": { "type": "string" },
+        "ports": { "type": "string" },
+        "cpu": { "type": "string" },
+        "memory": { "type": "string" },
+        "links": { "type": "array", "items": { "$ref": "#/$defs/Link" } },
+        "runtime": { "$ref": "#/$defs/Runtime" }
+      }
+    },
+    "ReleaseFrontmatter": {
+      "type": "object",
+      "required": ["service", "seq", "status", "image", "created_by", "created_at"],
+      "properties": {
+        "service": { "type": "string" },
+        "seq": { "type": "string" },
+        "status": { "type": "string" },
+        "image": { "type": "string" },
+        "created_by": { "type": "string" },
+        "created_at": { "type": "string" }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "required": ["id", "ts", "service", "release", "actor", "kind", "summary", "data"],
+      "properties": {
+        "id": { "type": "integer" },
+        "ts": { "type": "string" },
+        "service": { "type": "string" },
+        "release": { "type": "string" },
+        "actor": { "type": "string" },
+        "kind": { "type": "string" },
+        "summary": { "type": "string" },
+        "data": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "SpecFallback": {
+      "type": "object",
+      "properties": {
+        "ports": { "type": ["string", "array"] },
+        "resources": {
+          "type": "object",
+          "required": ["cpu", "memory"],
+          "properties": {
+            "cpu": { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        },
+        "links": { "type": "array", "items": { "$ref": "#/$defs/Link" } }
+      }
+    }
+  }
+}

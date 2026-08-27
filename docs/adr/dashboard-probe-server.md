@@ -31,22 +31,24 @@ Dashboard 的服务器状态部分需要真实指标（PRD `docs/prd/dashboard.m
      virtualization/bootTime
    - `GET /api/server/metrics` → cpuPercent/mem/swap/disk/netRate+total/
      tcp+udpConns/processCount/load1·5·15/uptimeSec
-   - `GET /api/services` → `[{id, name, status}]`（status 即
-     `desired_state`，`removed` 不进列表）
-   - `GET /api/services/{id}` → `{id, name, status, packRef, createdAt,
-     spec, links, releases, events}`；不存在或已 removed → 404 JSON
+   - `GET /api/services` → `[{id, name, desiredState}]`（`removed` 不进列表）
+   - `GET /api/services/{id}` → `{id, name, desiredState, packRef,
+     createdAt, ports, cpu, memory, runtime, links, releases, events}`；
+     不存在或已 removed → 404 JSON
+   - `GET /api/services/live` / `GET /api/services/{id}/live` → 合成状态
+     + live 行（见 `docs/adr/dashboard-live-and-watch.md`）
+   - `GET /api/ws` → store 变更推送 `{type:"store", path?}`
 5. **网络速率**由相邻两次采样差分得出；进程启动后的第一次采样速率为 0，
    不报「自开机以来平均值」这种误导性数字。
 6. **服务数据只读自 `~/.yoi/` store**（`dashboard/server/store/` 包）：
-   行级 frontmatter 解析（`---` 之间 `key: value`，与 ctxl 写出的扁平
-   约定一致）、body 里 `## Section` 下的 ```json 围栏块、events.ndjson
-   逐行解析。刻意不引 YAML 库——frontmatter 只有扁平字符串，根 go.mod
-   保持只有 gopsutil 一个直接依赖。store 路径优先级：`-store` flag →
-   `YOI_DASHBOARD_STORE` → `~/.yoi`。store 目录缺失 = 空列表，不是错误；
-   坏行/坏块容忍为零值，不让手改过的文件打挂整个接口。Release 按
-   created_at 倒序（并列时 seq 倒序），Event 按 ts 倒序。
-7. **开发期**：Vite dev server 把 `/api` 代理到 `127.0.0.1:8788`，前端
-   无跨域问题，cookie 同源流转。
+   YAML 解析 `---` 之间的 frontmatter，解码进 `schema.json` 生成的类型
+   （`go generate ./dashboard/server/store`）；body 里 `## Section` 下的
+   ```json 围栏块、events.ndjson 逐行解析。store 路径优先级：`-store`
+   flag → `YOI_DASHBOARD_STORE` → `~/.yoi`。store 目录缺失 = 空列表，
+   不是错误；坏行/坏块容忍为零值。Release 按 created_at 倒序（并列时
+   seq 倒序），Event 按 ts 倒序。旧 Service `## Spec` 仅作一版兼容回退。
+7. **开发期**：Vite dev server 把 `/api`（含 WebSocket）代理到
+   `127.0.0.1:8788`，前端无跨域问题，cookie 同源流转。
 
 ## 备选方案
 
@@ -66,10 +68,9 @@ Dashboard 的服务器状态部分需要真实指标（PRD `docs/prd/dashboard.m
   权限；采集单项失败时该字段为空/0，接口整体仍返回 200（前端按当前值
   展示，不因单项失败整页骨架屏）。`GET /api/server/info` 按字段独立采集，
   不把 `host.Info()` 的整体失败当成 500。
-- 服务 API 已落地（决策 4/6）：读 `~/.yoi/` 真实 store，前端 mock 层
-  移除。状态展示的是 `desired_state`（意图），live 实况（容器/进程的
-  实时占用）刻意不做——探针每次请求重读文件，store 更新即所见，但
-  文件本身由 yoi-server CLI 写，探针不写。
+- 服务文档 API 读 `~/.yoi/`；合成状态与占用走独立 live 接口（见
+  `docs/adr/service-runtime-binding.md` 与
+  `docs/adr/dashboard-live-and-watch.md`）。探针不写 store。
 
 ## 验证
 

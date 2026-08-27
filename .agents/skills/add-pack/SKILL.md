@@ -48,7 +48,7 @@ disable-model-invocation: true
 
 - frontmatter：`name` = slug；`description` 用英文一句话说清覆盖什么
 - 正文是 CHECKLIST 的蒸馏：先读 CHECKLIST、可用标准、安装走 reference 脚本
-- 结尾固定：绿了用 `yoi deploy write` 和 `yoi log append`
+- 结尾固定：绿了用服务器上的 `yoi-server` CLI 记一条 event（`yoi-server skills get`）
 
 ### 5. reference/install.sh（参考安装器）
 

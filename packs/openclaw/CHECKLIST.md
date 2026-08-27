@@ -1,6 +1,6 @@
 # OpenClaw 知识
 
-这是产品知识，不是安装手册。怎么部署、绿了怎么记，走 `yoi skills get deploy`。
+这是产品知识，不是安装手册。怎么部署看 `skill/SKILL.md`；绿了怎么记，走服务器上 `yoi-server` 的内置 skill（`yoi-server skills get`）。
 
 ## 它是什么
 

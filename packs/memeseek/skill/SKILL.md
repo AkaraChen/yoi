@@ -19,4 +19,4 @@ description: Install and verify MemeSeek (jnj52016/MemeSeek), a personal meme li
 
 用 `packs/memeseek/reference/install.sh`：只走 README「本地运行」那条路（clone → pnpm install → docker compose up -d → 复制 server/.env → prisma migrate deploy），先查前置（git / Node.js 23+ / pnpm 9+ / Docker Compose），打印将要做的事，等人输入 yes 才动手，装完即停。启动 `pnpm dev` 与填写 API Key 交还给人，agent 只提醒、不代填。
 
-绿了用 `yoi deploy write` 和 `yoi log append`。
+绿了用服务器上的 `yoi-server` CLI 记一条 event（命令参考：`yoi-server skills get`）。

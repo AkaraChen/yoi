@@ -7,10 +7,10 @@
 
 Dashboard 跑在用户自己的 Linux 服务器上，定位是「探针一样轻」的面板
 （PRD 见 `docs/prd/dashboard.md`）：单二进制分发、低占用、仅 localhost +
-密码。仓库已有 Go CLI（`cmd/yoi` + `internal/`）与 Next.js storefront
+密码。仓库已有 Go 代码（`internal/`）与 Next.js storefront
 （`web/`）。视觉体系必须复用共享令牌包 `@yoi/design`
-（`docs/adr/design-token-package.md`）。服务数据来源（大概率是 yoi CLI
-重新设计后的数据模型）尚未定，前端必须与数据源解耦。
+（`docs/adr/design-token-package.md`）。服务数据来源（即后来的
+`yoi-server` store）当时尚未定，前端必须与数据源解耦。
 
 ## 决策
 

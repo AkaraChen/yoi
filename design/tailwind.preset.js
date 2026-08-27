@@ -1,7 +1,7 @@
 /**
- * yoi Tailwind preset — maps semantic color names to the CSS variables in
- * tokens.css, plus the shared type stack, radii, and motion primitives.
- * Consumers add their own `content` globs and app-level layout config.
+ * Shared Tailwind preset: semantic colors from tokens.css, type stack,
+ * radii, and motion. Consumers add content globs, layout, and plugins
+ * (including tailwindcss-animate, installed in each app).
  *
  * @type {Partial<import("tailwindcss").Config>}
  */
@@ -92,7 +92,6 @@ const preset = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
 };
 
 module.exports = preset;

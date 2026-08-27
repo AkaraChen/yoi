@@ -71,7 +71,7 @@ live 占用和由 runtime 判定的 health 合成到状态点上。
 - custom：stdout `[{name, status, cpuPercent, memBytes, ...}]`，允许 `pid` 与任意 extra。
 - `GET /api/services/:id/live` 只含 live + 合成状态 + health，不含 Release/Event。
 - 改 `~/.yoi/services/*.md` 后面板在不整页刷新的情况下更新文档（WS）；live 仍 30s 一拉。
-- 样式走 `@yoi/design`，布局骨架不改。
+- 样式走 `design/` 语义令牌，布局骨架不改。
 
 ## 已解决的产品决策
 

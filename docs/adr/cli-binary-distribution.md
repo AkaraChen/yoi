@@ -31,12 +31,11 @@
 2. **CLI 矩阵**：`generated/yoi` → `yoi`，`generated/yoi-server` →
    `yoi-server`。goos ∈ {linux, darwin, windows} × goarch ∈ {amd64,
    arm64}。Windows 资产为 `.zip`（内含 `.exe`），其余为 `.tar.gz`。
-3. **探针**：`dashboard/server` 发布名为 `yoi-dashboard`。CI 必须先在
-   `design/` 下 `npm ci`（`@yoi/design` 的 `file:` 链接是 symlink，
-   preset 里的 `require("tailwindcss-animate")` 从 `design/` 解析，
-   不会看到 `dashboard/node_modules`），再在 `dashboard/` 下
-   `npm ci && npm run build`，使 `go:embed all:dist` 能嵌进
-   `dashboard/server/dist`。至少 linux amd64 + linux arm64。
+3. **探针**：`dashboard/server` 发布名为 `yoi-dashboard`。CI 在
+   `dashboard/` 下 `npm ci && npm run build`（令牌是相对路径引用
+   `design/` 源文件，插件装在 dashboard 自己的 `node_modules`），使
+   `go:embed all:dist` 能嵌进 `dashboard/server/dist`。至少 linux
+   amd64 + linux arm64。
    经 `-ldflags "-X main.version=$TAG"` 注入；`yoi-dashboard -version`
    打印该值。darwin/windows 探针资产不做承诺。
 4. **资产命名**（无版本号）：

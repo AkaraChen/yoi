@@ -38,7 +38,7 @@ yoi 的产品叙事是「在自己的 Linux 上把网红产品跑起来」。部
 - 服务数据来自本机 `~/.yoi/` store（yoi-server CLI 写入），探针只读。
   有 `runtime` 时资源区展示 live 占用；没有则「无法探测」。状态点为
   合成结果（见 `docs/prd/service-runtime-live.md`）。
-- 视觉体系与 `web/` storefront 完全一致，token 来自共享包 `@yoi/design`
+- 视觉体系与 `web/` storefront 完全一致，token 来自 `design/`
   （见 `docs/adr/design-token-package.md`），文案中文。
 
 ## 非目标
@@ -83,7 +83,7 @@ yoi 的产品叙事是「在自己的 Linux 上把网红产品跑起来」。部
 - 概览页趋势图随时间持续更新；探针重启后趋势从空重新累积。
 - 服务详情页五块（合成状态 / live 或无法探测 / 版本历史 / 事件 /
   外部链接）齐全，空态有处理。
-- 全部样式走 `@yoi/design` 语义令牌，组件层无硬编码颜色。
+- 全部样式走 `design/` 语义令牌，组件层无硬编码颜色。
 - `npm run build` 通过。
 
 ## 已解决的产品决策
@@ -94,7 +94,7 @@ yoi 的产品叙事是「在自己的 Linux 上把网红产品跑起来」。部
 - 信息架构：侧边栏（服务器状态 + 服务列表）+ 主内容区详情，服务器与
   服务平级，默认服务器概览（2026-08-27）。
 - 视觉：复用 storefront 的 Cursor 暖灰焦橙体系，token 共享自
-  `@yoi/design`（2026-08-27）。
+  `design/`（2026-08-27；2026-08-28 改为相对路径引用，不再是 npm 包）。
 - 服务详情五块内容：合成状态 / live 或无法探测 / 版本历史 / 事件 /
   外部链接（`links` frontmatter）。配置在 frontmatter，无 `## Spec`
   （2026-08-27，见 service-runtime-live）。

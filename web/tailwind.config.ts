@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  presets: [require("@yoi/design/tailwind.preset")],
+  presets: [require("../design/tailwind.preset")],
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     container: {
@@ -10,6 +10,7 @@ const config: Config = {
       screens: { "2xl": "1152px" },
     },
   },
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;

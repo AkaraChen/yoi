@@ -21,6 +21,22 @@ yoi 的产品 surface 分为三个世界，各自独立演化，通过约定好�
 
 `~/.yoi/` 里的 markdown **配置必须形式化，写在 frontmatter**（ctxl 声明过的字段，含对象/数组）。body 只放给人读的叙述或按章节约束的内容（例如 Release 的 Plan / Config / Outcome）。不要用 `## Spec` 自由 JSON 块承载配置。Service 的 `runtime`、`links`、`ports` 等见 `docs/adr/service-runtime-binding.md`。
 
+## Pack layout
+
+产品知识在 `packs/`，每个 pack 一个目录（slug 即目录名）：
+
+```
+packs/<slug>/
+├── page.mdx                  # 商店文章（只讲产品，不讲部署）
+├── skill/SKILL.md            # Agent 读的部署 skill
+├── CHECKLIST.md              # 部署核对清单
+├── reference/install.cmdspec # 参考安装器（要人输入 yes）
+├── cover.{png,webp}          # 官方封面（可选，缺省按 slug 生成）
+└── index.json                # 下载时要拉哪些文件
+```
+
+`page.mdx` 的 frontmatter 承载链接（扁平 `key: url`）与 `shop-only` 标记；正文不允许出现部署/安装说明（yoi 自身的安装流程归详情页安装卡）。详见 `docs/spec.md` 的 Web storefront 契约。
+
 ## Feature development
 
 For every new feature, use `$feature-dev` before implementation. Inspect the code and all project documentation, complete the one-question-at-a-time product and technical 质问, and record the agreed product requirements, architecture decisions, and general specification under `docs/` before changing feature code.

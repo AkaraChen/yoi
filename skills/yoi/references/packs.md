@@ -50,9 +50,8 @@ curl -fsSL --create-dirs -o "packs/$NAME/<rel>" "$site/packs/$NAME/<rel>"
 
 ## After the download
 
-Follow `packs/NAME/reference/install.cmdspec`. Interpret it (cmdspec is
-not executable — never `sh` it). Print the plan and wait for a typed yes
-before any `RUN` after the confirmation gate — do not skip that.
+The pack is information. Install and registration are `references/landing.md`
+— do not treat the pack skill as a bookkeeping script.
 
 ## Red lines
 

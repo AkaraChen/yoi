@@ -94,7 +94,7 @@ func (s *server) handleService(w http.ResponseWriter, r *http.Request) {
 		ID:           svc.ID,
 		Name:         svc.DisplayName,
 		DesiredState: svc.DesiredState,
-		PackRef:      svc.PackRef,
+		PackRef:      derefString(svc.PackRef),
 		CreatedAt:    svc.CreatedAt,
 		Ports:        svc.Ports,
 		CPU:          svc.Cpu,
@@ -124,6 +124,13 @@ func (s *server) handleService(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	writeJSON(w, out)
+}
+
+func derefString(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
 }
 
 func (s *server) handleServicesLive(w http.ResponseWriter, r *http.Request) {

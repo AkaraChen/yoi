@@ -136,7 +136,7 @@ type ServiceFrontmatter struct {
 	Memory string `json:"memory" yaml:"memory"`
 
 	// PackRef corresponds to the JSON schema field "pack_ref".
-	PackRef string `json:"pack_ref" yaml:"pack_ref"`
+	PackRef *string `json:"pack_ref,omitempty,omitzero" yaml:"pack_ref,omitempty"`
 
 	// Ports corresponds to the JSON schema field "ports".
 	Ports string `json:"ports" yaml:"ports"`

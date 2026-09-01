@@ -5,7 +5,9 @@ description: Install and verify the Hermes agent (NousResearch/hermes-agent) —
 
 # Hermes
 
-先读 `packs/hermes/CHECKLIST.md`，前置条件、模型入口、可用标准以它为准。
+产品知识。落地与登记走 yoi client skill，不要在这里记账。
+
+先读 `packs/hermes/CHECKLIST.md`，前置条件、模型入口、可用标准在那里。
 
 ## 可用标准
 
@@ -18,5 +20,3 @@ description: Install and verify the Hermes agent (NousResearch/hermes-agent) —
 ## 安装
 
 用 `packs/hermes/reference/install.cmdspec`（解读，不要 `sh`）：只走官方 curl 安装器，先查前置（git / curl / xz），打印将要做的事，等人输入 yes 才动手，装完即停。模型配置与密钥交还给人，agent 只提醒、不代填。
-
-绿了用服务器上的 `yoi-server` CLI 记一条 event（命令参考：`yoi-server skills get`）。

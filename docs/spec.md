@@ -2,7 +2,11 @@
 
 ## Product scope
 
-`project` is a greenfield or existing project that uses the agent documentation harness installed by `hnm`. Product purpose, users, and surface area beyond that harness should be refined through `$feature-dev` 质问 and recorded in `docs/prd/`, `docs/adr/`, and this file.
+yoi is a self-hosted operating layer for a personal deployment stack: one
+identity, one fact ledger, and one observation surface on the user's own
+Linux, operated by the user's coding agent. The storefront is the software
+source and acquisition surface, not the product. See
+`docs/prd/product-positioning.md` and `docs/adr/agent-as-operator.md`.
 
 Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
@@ -12,11 +16,14 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - **PRD**: a product requirements document under `docs/prd/` describing problem, users, goals, non-goals, flows, failure behavior, and acceptance criteria.
 - **ADR**: an architecture decision record under `docs/adr/` capturing one material technical choice, alternatives, and consequences.
 - **Spec**: this file — the single source of truth for shared terminology, observable contracts, and system-wide invariants.
-- **Pack**: a product-knowledge bundle living in a directory under `packs/`, identified by its slug (directory name, `[a-z0-9][a-z0-9-]*`). A pack is listed in the storefront only if it contains `page.mdx`. A pack ships an agent-ready skill (`skill/SKILL.md`), a checklist, and a reference install cmdspec.
-- **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the product's retention and routing layer: once installed, a human request like "用 yoi 安装 NAME" routes the agent through the yoi flow. Pack delivery inside the flow is pure HTTP (curl) — no binary is a prerequisite; the storefront sells the skill, not a CLI.
-- **Storefront**: the Next.js site in `web/`. The homepage `/` is the brand landing page with a pack preview section; the full pack list lives at `/shop`.
+- **Product (yoi)**: the self-hosted OS for a personal complete deployment stack. It is not a skill store, not a human control panel, and not a yoi-owned chat app.
+- **Operator**: the user's coding agent (Claude Code, Codex, …). The human talks to that agent. yoi does not ship a chat UI.
+- **Pack**: a product-knowledge bundle living in a directory under `packs/`, identified by its slug (directory name, `[a-z0-9][a-z0-9-]*`). A pack is listed in the storefront only if it contains `page.mdx`. A pack ships information the yoi skill may read (`skill/SKILL.md`, checklist, reference install cmdspec). It is not the install or registration procedure. Pack category is open; the current shelf is not a product boundary.
+- **Skill (yoi skill)**: the opt-in agent skill at `skills/yoi/SKILL.md`, installed into the user's agent. It is the shell: pack HTTP delivery, landing procedure, registration, and fleet routing. A human request like "用 yoi 安装 NAME" (or a landing with no pack) is executed here. Pack download is pure HTTP (curl) — no binary is a prerequisite. Finishing a landing for the OS requires `yoi-server` on the target machine.
+- **Registration**: when the agent judges a yoi landing complete, the target machine's `~/.yoi/` must contain a Service (identity), a Release for this landing, and at least one Event. `runtime` is written when the agent knows the supervisor binding; `pack_ref` is written when a pack was used. See `docs/prd/os-registration.md`.
+- **Storefront**: the Next.js site in `web/`. It is the software source (pack catalog) and the landing that installs the yoi skill. The homepage `/` is the brand landing page with a pack preview section; the full pack list lives at `/shop`.
 - **Shop filter**: In-place narrowing of the `/shop` grid by a visitor query against pack slug and excerpt. It is not a search page, not a search API, and not the yoi skill's pack search.
-- **Dashboard**: the on-server probe panel in `dashboard/` — a lightweight, single-user web UI that runs on the user's own Linux server and shows current server metrics plus the services deployed on that machine. See `docs/prd/dashboard.md`.
+- **Dashboard**: the on-server probe panel in `dashboard/` — a lightweight, single-user, read-only web UI that runs on the user's own Linux server and shows current server metrics plus the services recorded on that machine. It is a glance and audit surface, not a control plane. See `docs/prd/dashboard.md`.
 - **Agent Context Layer**: the fact-recording layer between Agent and Dashboard, storing deployment intent (Release) and execution facts (Event) as documents under `~/.yoi/`; current state (Resource) is served live by the Dashboard probe and never persisted. See `docs/prd/agent-context-layer.md` and `docs/adr/agent-data-model.md`.
 
 ## Observable contracts
@@ -31,8 +38,11 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 ### Product positioning
 
-- The product sold on the storefront is the **skill layer** (the yoi skill plus per-pack skills). Pack delivery is HTTP instructions inside the skill; no CLI is required for it.
-- Narrative: deployment of trending products on the user's own Linux — "三分钟跑起来，不是三天". Brand copy says "网红产品" without narrowing to agent products. The two-sided structure (初级部署 / 高级清场) from the 2026-08-13 brainstorm is not yet reflected in the storefront; the beginner deployment face leads.
+- The product is the **self-hosted OS** for a personal deployment stack (identity, ledger, observation), operated by the user's coding agent. The storefront is the software source and acquisition surface. The yoi skill is the shell, not the thing being sold. See `docs/prd/product-positioning.md` and `docs/adr/agent-as-operator.md`.
+- Pack delivery is HTTP instructions inside the skill; no CLI is required for it. Pack category is open. A shelf that happens to be agent products is not a category commitment.
+- Acquisition copy may still lead with the first command — install the skill, then "用 yoi 安装 NAME", "三分钟跑起来" — but that copy must not redefine the product as a skill store or a trending-product shop.
+- The operator is the user's existing coding agent. yoi does not ship a chat UI. The dashboard is read-only (no start/stop, no config edits, no one-click install).
+- The two-sided structure (初级部署 / 高级清场) from the 2026-08-13 brainstorm is not a current commitment.
 - Red lines for any user-facing surface: no silent or unattended install claims; installation is opt-in with human-in-the-loop confirmation (the skill asks before installing a CLI, the probe, or a pack). Pack `reference/install.cmdspec` files wait for a typed yes. CLI/probe Unix installers are cmdspec documents (agent-interpreted, not executable; no yes-gate inside the document). Windows CLIs stay on `irm | iex` `.ps1` files. Uninstall must be honest (deleting the pack directory removes the pack); no bundling or cross-promotion of 2code; no per-page cloud AFF — AFF may only appear in 试验场/干净机 contexts if such content exists.
 - The storefront's primary call to action is installing the yoi skill (`npx skills add AkaraChen/yoi --skill yoi -g`); per-pack install is phrased as telling the agent "用 yoi 安装 <slug>".
 
@@ -66,7 +76,7 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 - **Server world**: the user's Linux server. Runs the Dashboard probe and stores deployment facts in `~/.yoi/` (markdown entities plus an NDJSON event stream). The server-side `yoi-server` CLI (ctxl-generated from `yoi-server.schema.json`) is the write entrypoint; Dashboard is read-only.
 - **Client world**: the user's development machine. Runs the user's Agent and the client-side `yoi` CLI (ctxl-generated from `yoi.schema.json`). Stores server inventory, credential references, and provider accounts in `~/.yoi/`. The Agent bridges Client and Server worlds.
-- **Web world**: the storefront in `web/`. Read-only pack marketplace; never touches Server or Client storage directly.
+- **Web world**: the storefront in `web/`. Read-only software source (pack catalog); never touches Server or Client storage directly.
 
 ### Agent Context Layer
 
@@ -77,13 +87,15 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 - Live host metrics and service occupancy are served at request time by the Dashboard Go probe and are never persisted to the store. Service occupancy requires a frontmatter `runtime`; without it the UI is「无法探测」and the probe does not scan the machine.
 - Release status (`pending`/`active`/`failed`/`superseded`) is a fact, not a state machine. Any entity with yoi CLI permission can change it; the change itself is recorded as an Event.
 - Single-machine isolation: each Dashboard is an independent universe. Multi-machine aggregation is the user's Agent's responsibility, not yoi's.
-- The context layer records facts only; it does not validate plans, enforce rollbacks, or block dangerous operations.
+- The context layer records facts only; it does not validate plans, enforce rollbacks, or block dangerous operations. It does not define an objective “installed” or “green” bar — the agent judges completion (`docs/prd/os-registration.md`).
+- When the agent judges a yoi landing complete, registration is mandatory on that machine: Service + this Release + Event, written with `yoi-server`. Missing `yoi-server` uses the existing ask-then-install path; if the human refuses, the agent must not claim registration succeeded.
+- Pack files are information for that procedure. They must not be the bookkeeping script (no “when green, write only an event”).
 - Server-side entities are stored under `~/.yoi/` on the server; client-side entities (server inventory, credential references, provider accounts) are stored under `~/.yoi/` on the development machine. The two stores are separate and never synchronized automatically.
 
 ### CLI
 
 - Two CLIs exist, both ctxl-generated from root schemas: `yoi` (client-world fleet inventory, `yoi.schema.json`) and `yoi-server` (server-world fact store, `yoi-server.schema.json`). Generated output lands in `generated/<name>` and is replaced in place on regeneration.
-- Pack delivery is pure HTTP inside the yoi skill (`skills/yoi/references/packs.md`), not a binary. Base URL resolution: `YOI_PACKS` environment variable → built-in default `https://yoi-sigma.vercel.app`; a `/packs` path suffix is trimmed to the site root so one override value serves all requests.
+- Pack delivery is pure HTTP inside the yoi skill (`skills/yoi/references/packs.md`), not a binary. Downloading a pack does not register it. Registration is a separate write on the target machine after the agent judges the landing complete. Base URL resolution: `YOI_PACKS` environment variable → built-in default `https://yoi-sigma.vercel.app`; a `/packs` path suffix is trimmed to the site root so one override value serves all requests.
 - Pack list/search fetch `GET <base>/packs.json`; search filters client-side (case-insensitive substring on slug or excerpt). Pack get fetches `<base>/packs/<slug>/index.json` and downloads every listed file into `./packs/<slug>/` at mode `0644` (`.cmdspec` is not a script and is not marked executable); it does not install anything. Pack delivery does not require a yoi CLI.
 - Binary distribution: a `v*` tag publishes a GitHub Release. Unauthenticated stable URLs are `https://github.com/AkaraChen/yoi/releases/latest/download/<asset>`. Asset names do not include the version. Platforms: `yoi` and `yoi-server` for linux/darwin/windows × amd64/arm64 (`tar.gz`, except Windows `.zip` with `.exe`); `yoi-dashboard` at least linux amd64 and linux arm64 (`tar.gz`). The Release also has `checksums.txt` (sha256 of every archive).
 - Install entrypoints (raw.githubusercontent.com; the skill asks the human first):
@@ -103,5 +115,6 @@ Out of scope until explicitly specified: anything not yet accepted in a PRD.
 
 ## Current implementation status
 
-- Documentation harness directories and agent workflow files were installed by `hnm init`.
-- Product features beyond the harness are not specified yet — run `$feature-dev` for the next feature.
+- Product identity, three worlds, context layer, dashboard probe, pack delivery, and CLI/probe distribution are specified in this file and the linked PRDs/ADRs.
+- OS registration after a yoi landing is specified and the procedure lives in `skills/yoi/references/landing.md`. Pack files and `add-pack` are information only.
+- Run `$feature-dev` for the next feature.

@@ -1,14 +1,21 @@
 # Project workflows
 
+## Product
+
+yoi 是个人完整部署栈的自托管操作系统。商店是软件源，不是产品本身。
+操作者是用户的编码 Agent；Dashboard 只读。定位见
+`docs/prd/product-positioning.md`，约束见
+`docs/adr/agent-as-operator.md` 与 `docs/spec.md`。
+
 ## Three worlds
 
 yoi 的产品 surface 分为三个世界，各自独立演化，通过约定好的边界交互：
 
 | 世界 | 位置 | 职责 | 存储 |
 |------|------|------|------|
-| **Server** | 用户 Linux 服务器 | Dashboard（探针面板）+ `~/.yoi/`（部署事实） | `~/.yoi/` markdown 文档 |
-| **Client** | 用户开发机 | Agent skill + `yoi` CLI（多机管理） | `~/.yoi/` 服务器清单与凭证 |
-| **Web** | `web/` storefront | Pack marketplace，展示与分发 | `packs/` 目录 |
+| **Server** | 用户 Linux 服务器 | Dashboard（只读探针）+ `~/.yoi/`（部署事实） | `~/.yoi/` markdown 文档 |
+| **Client** | 用户开发机 | Agent skill（壳）+ `yoi` CLI（多机清单） | `~/.yoi/` 服务器清单与凭证 |
+| **Web** | `web/` storefront | Pack 软件源：展示与分发 | `packs/` 目录 |
 
 边界规则：
 
@@ -28,7 +35,7 @@ yoi 的产品 surface 分为三个世界，各自独立演化，通过约定好�
 ```
 packs/<slug>/
 ├── page.mdx                  # 商店文章（只讲产品，不讲部署）
-├── skill/SKILL.md            # Agent 读的部署 skill
+├── skill/SKILL.md            # Agent 读的产品知识（落地与登记在 yoi skill）
 ├── CHECKLIST.md              # 部署核对清单
 ├── reference/install.cmdspec # 参考安装器（要人输入 yes）
 ├── cover.{png,webp}          # 官方封面（可选，缺省按 slug 生成）

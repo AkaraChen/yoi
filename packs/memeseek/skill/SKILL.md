@@ -5,7 +5,9 @@ description: Install and verify MemeSeek (jnj52016/MemeSeek), a personal meme li
 
 # MemeSeek
 
-先读 `packs/memeseek/CHECKLIST.md`，前置条件、配置落点、可用标准以它为准。
+产品知识。落地与登记走 yoi client skill，不要在这里记账。
+
+先读 `packs/memeseek/CHECKLIST.md`，前置条件、配置落点、可用标准在那里。
 
 ## 可用标准
 
@@ -18,5 +20,3 @@ description: Install and verify MemeSeek (jnj52016/MemeSeek), a personal meme li
 ## 安装
 
 用 `packs/memeseek/reference/install.cmdspec`（解读，不要 `sh`）：只走 README「本地运行」那条路（clone → pnpm install → docker compose up -d → 复制 server/.env → prisma migrate deploy），先查前置（git / Node.js 23+ / pnpm 9+ / Docker Compose），打印将要做的事，等人输入 yes 才动手，装完即停。启动 `pnpm dev` 与填写 API Key 交还给人，agent 只提醒、不代填。
-
-绿了用服务器上的 `yoi-server` CLI 记一条 event（命令参考：`yoi-server skills get`）。

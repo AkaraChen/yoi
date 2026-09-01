@@ -36,7 +36,7 @@ disable-model-invocation: true
 
 ### 3. CHECKLIST.md（产品知识）
 
-给 agent 读的知识文件，不是安装手册。要回答的问题不变，但切入点必须来自官方文档：
+给 agent 读的知识文件，不是安装手册。开篇写明落地与登记走 yoi skill。要回答的问题不变，但切入点必须来自官方文档：
 
 - 它是什么：仓库 / 文档链接；第一版有用的面是什么（≈ 官方 quickstart 的终点，不是全部能力）
 - 环境怎么选：官方写明的真实前置条件（运行时版本、包管理器、端口、必设环境变量、已知坑）
@@ -47,8 +47,8 @@ disable-model-invocation: true
 ### 4. skill/SKILL.md（agent skill）
 
 - frontmatter：`name` = slug；`description` 用英文一句话说清覆盖什么
-- 正文是 CHECKLIST 的蒸馏：先读 CHECKLIST、可用标准、安装走 reference cmdspec
-- 结尾固定：绿了用服务器上的 `yoi-server` CLI 记一条 event（`yoi-server skills get`）
+- 正文是 CHECKLIST 的蒸馏：先读 CHECKLIST、可用标准、官方安装路径与 cmdspec
+- 开篇写明这是产品知识；落地与登记走 yoi client skill，不要在 pack 里写记账手续（不要「绿了记一条 event」）
 
 ### 5. reference/install.cmdspec（参考安装器）
 

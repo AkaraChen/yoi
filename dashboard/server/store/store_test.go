@@ -106,6 +106,12 @@ func TestReadServices(t *testing.T) {
 	if svcs[0].DisplayName != "LobeHub" || svcs[0].DesiredState != "running" {
 		t.Fatalf("bad fields: %+v", svcs[0])
 	}
+	if svcs[0].PackRef == nil || *svcs[0].PackRef != "lobehub" {
+		t.Fatalf("pack_ref: %v", svcs[0].PackRef)
+	}
+	if svcs[1].PackRef != nil || svcs[1].Runtime.Present() {
+		t.Fatalf("no-pack service must read without pack_ref/runtime: %+v", svcs[1])
+	}
 	if svcs[0].Ports != "3210" || svcs[0].Memory != "1G" {
 		t.Fatalf("spec fallback: ports=%q memory=%q", svcs[0].Ports, svcs[0].Memory)
 	}

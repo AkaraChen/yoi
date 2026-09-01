@@ -18,9 +18,9 @@ get/list/search 子命令承载，带来两个持续成本：
 - **命名冲突**：`cmd/yoi` 与 ctxl 生成的 client CLI 都叫 `yoi`
   （docs/adr/agent-data-model.md 决策 8 曾记为开放决策）。
 
-同时，产品定位一直是「storefront 卖的是 skill 层，CLI 只是投递机制」
-（docs/spec.md）。既然投递机制可以用三行 curl 表达，二进制就没有存在
-必要。
+同时，商店是软件源，skill 是进 OS 的壳；pack 投递不该绑死在 CLI 上
+（docs/spec.md、docs/prd/product-positioning.md）。投递机制可以用三行
+curl 表达，二进制就没有存在必要。
 
 ## 决策
 

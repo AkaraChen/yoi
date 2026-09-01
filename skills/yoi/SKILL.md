@@ -1,26 +1,24 @@
 ---
 name: yoi
-description: Install a product pack over plain HTTP (no yoi binary needed), or manage the client-side server fleet inventory with the yoi CLI. Use when the human says "用 yoi 安装 NAME", asks what packs exist, or wants to register/inspect managed servers.
+description: Land software on a Linux machine (pack optional), register it into that machine's yoi store, or manage the client-side server fleet. Use when the human says "用 yoi 安装 NAME", asks to install something via yoi with no pack, asks what packs exist, or wants to register/inspect managed servers.
 ---
 
 # yoi
 
-yoi is a deployment-skill storefront for coding agents: each pack is a complete
-deployment guide for a trending product, run on the human's own Linux server.
-This file is only a router — feature detail lives in `references/`.
+yoi is the self-hosted OS for a personal deployment stack. The operator is
+the human's coding agent; this file is the shell. Feature detail lives in
+`references/`. Pack category is open; do not assume the catalog is only
+agent products.
 
 ## Routing
 
-- The human says 用 yoi 安装 NAME, asks what packs exist, or searches for a
-  pack → `references/packs.md`. Pack list/search/get are pure HTTP (curl);
-  no yoi binary is required. NAME is the pack they named — do not pick a
-  product for them.
-- Register or inspect managed servers, providers, or credential references on
-  this dev machine → `references/fleet.md` (the `yoi` ctxl CLI; the store is
-  plain markdown under `~/.yoi/`). Fleet writes need the `yoi` binary; if it
-  is missing, offer the install command in `fleet.md` and ask before
-  installing. Pack HTTP delivery does not need the CLI.
-
-When deploying on a server, deployment facts are recorded on that machine with
-the `yoi-server` CLI — run `yoi-server skills get` there for
-its command reference.
+- Land software on a Linux machine (「用 yoi 安装 NAME」, or the same
+  request with no pack) → `references/landing.md`. That file is the only
+  install and registration procedure. Packs are information.
+- List, search, or download a pack → `references/packs.md`. Pure HTTP
+  (curl); no yoi binary. NAME is the pack they named — do not pick a
+  product for them. Download is not install and not registration.
+- Register or inspect managed servers, providers, or credential references
+  on this dev machine → `references/fleet.md` (the `yoi` ctxl CLI). Fleet
+  writes need the `yoi` binary; if it is missing, offer the install command
+  in `fleet.md` and ask before installing.

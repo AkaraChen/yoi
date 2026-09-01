@@ -2,13 +2,13 @@
 
 ## 问题与背景
 
-yoi 的愿景是「在自己的 Linux 上把网红产品跑起来」，而执行部署的是用户的
-Agent（Claude Code、Codex 等）。Agent 需要记忆：上次部署了什么、为什么
-失败、配置改成了什么样。用户需要审计：Agent 到底对这台机器做了什么。
+yoi 是个人部署栈的自托管 OS，操作者是用户的 Agent（Claude Code、Codex
+等）。Agent 需要记忆：上次部署了什么、为什么失败、配置改成了什么样。
+用户需要审计：Agent 到底对这台机器做了什么。
 
-当前 Dashboard 只有 mock 数据，没有真实的数据层。本 PRD 定义 Agent 与
-Dashboard 之间的 context layer——一个跑在服务器上的事实记录系统，让
-Agent 能提交部署意图、上报执行结果、查询历史，让用户能审计所有操作。
+本 PRD 定义这个操作系统的上下文层——跑在服务器上的事实记录系统，让
+Agent 能提交部署意图、上报执行结果、查询历史，让用户能通过只读
+Dashboard 审计所有操作。yoi 展开上下文，不把操作收成面板。
 
 ## 目标用户
 
@@ -17,6 +17,8 @@ Agent 能提交部署意图、上报执行结果、查询历史，让用户能�
 
 ## 用户故事
 
+- 作为 Agent，我自认一次经 yoi 的落地结束后，必须写下 Service、本次
+  Release 和 Event（见 `docs/prd/os-registration.md`）。
 - 作为 Agent，我在部署前查询该服务的 Release 历史，决定是升级还是回滚。
 - 作为 Agent，我提交一个 Release（声明版本、配置、计划），然后执行，
   最后上报 outcome。

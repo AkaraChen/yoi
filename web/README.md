@@ -1,6 +1,6 @@
 # yoi storefront
 
-yoi 的 Pack 商店，Next.js 15 + Tailwind 3。Vercel Root Directory 设为 `web`。
+yoi 软件源（Pack 目录），Next.js 15 + Tailwind 3。产品本身是部署栈 OS，本目录只做展示与分发。Vercel Root Directory 设为 `web`。
 
 - 路由：`/`（品牌落地页 + 精选 Pack 预览）、`/shop`（全部 Pack，`?q=` 原地过滤）、`/[slug]`（Pack 详情）、`/packs.json`（机器可读索引）
 - 唯一数据源是仓库根目录的 `packs/`；新增 pack 不需要额外配置

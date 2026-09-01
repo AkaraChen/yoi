@@ -40,7 +40,7 @@
     },
     "ServiceFrontmatter": {
       "type": "object",
-      "required": ["display_name", "pack_ref", "desired_state", "created_at", "ports", "cpu", "memory", "links"],
+      "required": ["display_name", "desired_state", "created_at", "ports", "cpu", "memory", "links"],
       "properties": {
         "display_name": { "type": "string" },
         "pack_ref": { "type": "string" },
